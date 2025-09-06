@@ -24,6 +24,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ],
+    "extra": {
+      "baseUrl": "https://g30xmfzs-5778.inc1.devtunnels.ms"
     }
   }
 }
