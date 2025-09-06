@@ -103,7 +103,6 @@ const Form = () => {
     const handleSubmit = async (values) => {
         let imageUrl = '';
         if (image && image.uri) {
-            console.log("Started Uploading....");
             const imgForm = new FormData();
 
             const imageData = {
@@ -115,13 +114,11 @@ const Form = () => {
             try {
                 const response = await uploadImage(imgForm);
                 imageUrl = response?.urls[0] || "";
-                console.log("Uploaded Image URL: ", imageUrl);
             } catch (error) {
                 Toast.error(error);
                 return;
             }
         }
-        // return;
 
         const payload = {
             name: values.fullName,
