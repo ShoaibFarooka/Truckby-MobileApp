@@ -36,8 +36,8 @@ function useForm(initialValues = {}, schema = null) {
     };
 
     const onSubmit = async (handleSubmit) => {
-        // const isValid = await validate();
-        // if (!isValid) return;
+        const isValid = await validate();
+        if (!isValid) return;
         await handleSubmit(values);
     };
 
