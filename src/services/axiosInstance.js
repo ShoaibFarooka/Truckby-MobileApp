@@ -2,7 +2,7 @@ import axios from 'axios';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import store from '../redux/store.js';
-import { setAccessToken, clearAuth } from '../redux/authSlice.js';
+import { setAccessToken, setAuth, clearAuth } from '../redux/authSlice.js';
 
 const { baseUrl } = Constants.expoConfig.extra;
 
@@ -24,9 +24,14 @@ const getRefreshToken = async () => {
     return await SecureStore.getItemAsync('refreshToken');
 };
 
-// Helper to set new access token in Redux store
-const setNewAccessToken = (token) => {
-    store.dispatch(setAccessToken(token));
+// Helper to set refresh token in SecureStore
+const setRefreshToken = async (newRefreshToken) => {
+    return await SecureStore.setItemAsync('refreshToken', newRefreshToken);
+};
+
+// Helper to set new auth in Redux store
+const setNewAuth = (newAccessToken, user) => {
+    store.dispatch(setAuth({ token: newAccessToken, user }));
 };
 
 // Helper to clear auth on logout
@@ -85,12 +90,12 @@ axiosInstance.interceptors.response.use(
                         throw new Error('No refresh token available');
                     }
 
-                    //pass refresh token as well
-                    const response = await axios.post(`${baseUrl}/api/user/refresh-token`, {});
-                    const { token: newToken } = response.data;
-                    setNewAccessToken(newToken);
-                    onRefreshed(newToken);
-                    console.log('Refresh token done!');
+                    const response = await axios.post(`${baseUrl}/api/user/refresh-token`, { refreshToken });
+                    const { newAccessToken, newRefreshToken, user } = response.data;
+                    setNewAuth(newAccessToken, user);
+                    await setRefreshToken(newRefreshToken);
+                    onRefreshed(newAccessToken);
+                    console.log('Axios Instance Refresh Token Done!');
                     return axiosInstance(originalRequest);
                 } catch (err) {
                     console.log('Error in refreshing token: ', err);
