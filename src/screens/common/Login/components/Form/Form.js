@@ -6,7 +6,7 @@ import Fontisto from '@expo/vector-icons/Fontisto';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { setAccessToken } from "../../../../../redux/authSlice";
+import { setAuth } from "../../../../../redux/authSlice";
 import * as SecureStore from 'expo-secure-store';
 import { Toast } from 'toastify-react-native'
 import * as yup from "yup";
@@ -25,7 +25,7 @@ const Form = () => {
         password: "",
     };
     const form = useForm(initialValues, schema);
-    const { execute, loading, error } = useApi(userService.loginUser);
+    const { execute, loading } = useApi(userService.loginUser);
     const [secure, setSecure] = useState(true);
 
     const dispatch = useDispatch();
@@ -34,9 +34,9 @@ const Form = () => {
     const handleSubmit = async (values) => {
         try {
             const response = await execute(values);
-            if (response.accessToken && response.refreshToken) {
+            if (response.accessToken && response.refreshToken && response.user) {
                 await SecureStore.setItemAsync('refreshToken', response.refreshToken);
-                dispatch(setAccessToken(response.accessToken));
+                dispatch(setAuth({ token: response.accessToken, user: response.user }))
                 form.resetForm();
                 navigation.replace("Home");
             } else {

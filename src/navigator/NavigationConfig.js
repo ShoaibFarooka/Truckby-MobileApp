@@ -1,6 +1,7 @@
-// import Home from '../screens/common/Home/Home.js';
+import Home from '../screens/common/Home/Home.js';
 import Login from '../screens/common/Login/Login.js';
 import Signup from '../screens/common/Signup/Signup.js';
+import Splash from '../screens/common/Splash/Splash.js';
 // import NotFound from '../screens/common/NotFound/NotFound.js';
 // import PrivacyPage from '../screens/common/Privacy/PrivacyPage.js';
 // import SellerProfile from '../screens/common/Profile/SellerProfile.js';
@@ -23,7 +24,8 @@ const routes = [
     // { name: "Plans", component: Plans, protected: true, authRedirect: false, showHeader: true, showFooter: true },
 
     //common
-    // { name: "Home", component: Home, protected: false, authRedirect: false, showHeader: true, showFooter: true },
+    { name: "Splash", component: Splash, protected: false, allowedRoles: [], authRedirect: false, showHeader: false, showFooter: false },
+    { name: "Home", component: Home, protected: false, allowedRoles: [], authRedirect: false, showHeader: true, showFooter: true },
     { name: "Login", component: Login, protected: false, allowedRoles: [], authRedirect: true, showHeader: true, showFooter: true },
     { name: "Signup", component: Signup, protected: false, allowedRoles: [], authRedirect: true, showHeader: true, showFooter: true },
     // { name: "Filter", component: FilterPage, protected: false, authRedirect: false, showHeader: true, showFooter: true },

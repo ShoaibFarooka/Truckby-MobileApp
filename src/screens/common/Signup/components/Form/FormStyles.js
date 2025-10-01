@@ -50,8 +50,7 @@ export const styles = StyleSheet.create({
     },
     icon: {
         position: "absolute",
-        top: "50%",
-        transform: [{ translateY: -9 }],
+        top: 13,
         zIndex: 1
     },
     leftIcon: {
