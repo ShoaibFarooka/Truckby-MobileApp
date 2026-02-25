@@ -5,11 +5,13 @@ import store from './src/redux/store.js';
 import ToastManager from 'toastify-react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Navigator from "./src/navigator/Navigator.js";
+import Loader from "./src/components/Loader/Loader.js";
 
 export default function App() {
   return (
     <Provider store={store}>
       <SafeAreaProvider>
+        <Loader />
 
         <NavigationContainer>
           <Navigator />

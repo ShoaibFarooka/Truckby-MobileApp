@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children, allowedRoles = [] }) => {
     }, [isAuthenticated, navigation]);
 
     if (!isAuthenticated) {
-        return null; //loader while navigation
+        return null; //while navigation
     }
 
     const userRole = user?.role;

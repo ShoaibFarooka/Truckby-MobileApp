@@ -9,6 +9,8 @@ import { verifyAuthentication } from '../../../utils/authUtils';
 import useApi from '../../../hooks/useApi';
 import userService from '../../../services/userService';
 
+const logo = require('../../../../assets/images/logo.png');
+
 const Splash = () => {
     const dotsCount = 3;
     const animationDuration = 1100; // total duration per dot animation
@@ -85,7 +87,7 @@ const Splash = () => {
             <Animatable.Image
                 animation="fadeInDown"
                 duration={1500}
-                source={require('../../../../assets/images/logo.png')}
+                source={logo}
                 style={styles.logo}
                 resizeMode="contain"
             />

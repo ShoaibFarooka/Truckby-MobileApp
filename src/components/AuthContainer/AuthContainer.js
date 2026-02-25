@@ -1,17 +1,20 @@
 import { View, ScrollView, Image, ImageBackground } from "react-native";
 import { styles } from "./AuthContainerStyles";
 
+const bg = require("../../../assets/images/truck_image1.png");
+const logo = require("../../../assets/images/login_logo.png");
+
 const AuthContainer = ({ children }) => {
     return (
         <ScrollView style={styles.container}>
             <ImageBackground
-                source={require("../../../assets/images/truck_image1.png")}
+                source={bg}
                 style={styles.background}
                 resizeMode="cover"
             />
             <View style={styles.box}>
                 <Image
-                    source={require("../../../assets/images/login_logo.png")}
+                    source={logo}
                     style={styles.logo}
                     alt="Truckby"
                 />

@@ -2,7 +2,7 @@ import axios from 'axios';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 import store from '../redux/store.js';
-import { setAccessToken, setAuth, clearAuth } from '../redux/authSlice.js';
+import { setAuth, clearAuth } from '../redux/authSlice.js';
 
 const { baseUrl } = Constants.expoConfig.extra;
 

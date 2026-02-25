@@ -16,9 +16,8 @@ const Navigator = () => {
                 >
                     {(props) => (
                         <Layout showHeader={route.showHeader} showFooter={route.showFooter}>
-                            {/* <route.component {...props} /> */}
                             {route.protected ?
-                                <ProtectedRoute>
+                                <ProtectedRoute allowedRoles={route.allowedRoles}>
                                     <route.component {...props} />
                                 </ProtectedRoute>
                                 : route.authRedirect ?
