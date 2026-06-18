@@ -4,6 +4,8 @@ import Signup from '../screens/common/Signup/Signup.js';
 import Splash from '../screens/common/Splash/Splash.js';
 import Privacy from '../screens/common/Privacy/Privacy.js';
 import ContactUs from '../screens/common/ContactUs/ContactUs.js';
+import FilterPage from '../screens/common/Filter/FilterPage.js';
+import DetailPage from '../screens/common/Detail/DetailPage.js';
 // import NotFound from '../screens/common/NotFound/NotFound.js';
 // import SellerProfile from '../screens/common/Profile/SellerProfile.js';
 // import AddTruckPage from '../screens/seller/AddTruck/AddTruckPage.js';
@@ -27,12 +29,13 @@ const routes = [
     //common
     { name: "Splash", component: Splash, protected: false, allowedRoles: [], authRedirect: false, showHeader: false, showFooter: false },
     { name: "Home", component: Home, protected: false, allowedRoles: [], authRedirect: false, showHeader: true, showFooter: true },
+    { name: "Filter", component: FilterPage, protected: false, allowedRoles: [], authRedirect: false, showHeader: true, showFooter: true },
     { name: "Login", component: Login, protected: false, allowedRoles: [], authRedirect: true, showHeader: true, showFooter: true },
     { name: "Signup", component: Signup, protected: false, allowedRoles: [], authRedirect: true, showHeader: true, showFooter: true },
     { name: "Privacy", component: Privacy, protected: false, allowedRoles: [], authRedirect: false, showHeader: true, showFooter: true },
     { name: "ContactUs", component: ContactUs, protected: false, allowedRoles: [], authRedirect: false, showHeader: true, showFooter: true },
     // { name: "Filter", component: FilterPage, protected: false, authRedirect: false, showHeader: true, showFooter: true },
-    // { name: "Detail", component: DetailPage, protected: false, authRedirect: false, showHeader: true, showFooter: true },
+    { name: "Detail", component: DetailPage, protected: false, authRedirect: false, showHeader: true, showFooter: true },
     //   { name: "/inventory/:userId", component: Inventory, protected: false, authRedirect: false, showHeader: true, showFooter: true },
     // { name: "NotFound", component: NotFound, protected: false, authRedirect: false, showHeader: false, showFooter: false },
 ];
