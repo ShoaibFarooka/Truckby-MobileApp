@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { View, ScrollView } from 'react-native';
 import { useDispatch } from 'react-redux';
-/* import { ShowLoading, HideLoading } from '../../../redux/loaderSlice';
-import truckService from '../../../services/truckService'; */
+import { showLoader, hideLoader } from '../../../redux/loaderSlice';
+import truckService from '../../../services/truckService';
 import ImageCarousel from './components/ImageCarousel/ImageCarousel';
 import Info from './components/Info/Info';
 import DetailInfo from './components/DetailInfo/DetailInfo';
@@ -32,13 +32,13 @@ const DetailPage = ({ route }) => {
         if (!routeData && id) {
             const fetchData = async () => {
                 try {
-                    dispatch(ShowLoading());
+                    dispatch(showLoader());
                     const response = await truckService.getTruckById(id);
                     setData(response);
                 } catch (err) {
                     console.error('Error fetching truck:', err);
                 } finally {
-                    dispatch(HideLoading());
+                    dispatch(hideLoader());
                 }
             };
             fetchData();

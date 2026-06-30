@@ -85,23 +85,23 @@ const updateCustomerEmail = async (stripeCustomerId, newEmail) => {
     }
 };
 
-const createCheckoutSession = async (priceId, stripeCustomerId, CLIENT_URL) => {
+const createCheckoutSession = async (priceId, stripeCustomerId, redirectBase, isMobile) => {
     try {
-        const session = await stripe.checkout.sessions.create(
-            {
-                mode: "subscription",
-                payment_method_types: ["card"],
-                line_items: [
-                    {
-                        price: priceId,
-                        quantity: 1,
-                    },
-                ],
-                success_url: `${CLIENT_URL}/seller/success`,
-                cancel_url: `${CLIENT_URL}/seller/plans`,
-                customer: stripeCustomerId,
-            }
-        );
+        const successUrl = isMobile
+            ? `${redirectBase}/mobile-redirect/success`
+            : `${redirectBase}/seller/success`;
+        const cancelUrl = isMobile
+            ? `${redirectBase}/mobile-redirect/cancel`
+            : `${redirectBase}/seller/plans`;
+
+        const session = await stripe.checkout.sessions.create({
+            mode: "subscription",
+            payment_method_types: ["card"],
+            line_items: [{ price: priceId, quantity: 1 }],
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+            customer: stripeCustomerId,
+        });
         return session.url;
     } catch (error) {
         console.log("Stripe Checkout Error: ", error);

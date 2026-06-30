@@ -27,10 +27,14 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-video"
+      "expo-video",
+      "expo-web-browser"
     ],
     "extra": {
-      "baseUrl": "https://1m0fj1jr-5778.inc1.devtunnels.ms/"
+      "baseUrl": "https://x6t2pkqf-5778.inc1.devtunnels.ms/"
+    },
+    "expo": {
+      "scheme": "truckby"
     }
   }
 }

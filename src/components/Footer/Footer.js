@@ -25,7 +25,7 @@ const Footer = () => {
 
     const navLinks = [
         { name: 'Home', screen: 'Home', protected: false },
-        { name: 'Listings', screen: 'Listings', protected: true },
+        { name: 'Listing', screen: 'Listing', protected: true },
         { name: 'Inventory', screen: 'Inventory', protected: true },
         { name: 'Plans', screen: 'Plans', protected: true },
         { name: 'Privacy', screen: 'Privacy', protected: false },
