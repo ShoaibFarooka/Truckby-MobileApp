@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ScrollView, Image, Linking } from "react-native";
+import { View, Text, TouchableOpacity, ScrollView, Image } from "react-native";
 import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { Toast } from "toastify-react-native";
 import * as WebBrowser from "expo-web-browser";
+import * as Linking from "expo-linking";
 import subscriptionService from "../../../services/subscriptionService";
 import productService from "../../../services/productService";
 import stripeService from "../../../services/stripeService";
 import { showLoader, hideLoader } from "../../../redux/loaderSlice";
 import { fetchUserInfo } from "../../../redux/userSlice";
 import { styles } from "./PlansStyles";
+import { useNavigation } from "@react-navigation/native";
+
+
 
 
 const showToast = (type, message) => {
@@ -52,6 +56,7 @@ const Plans = () => {
     });
     const [oldProductId, setOldProductId] = useState(null);
     const dispatch = useDispatch();
+    const navigation = useNavigation();
 
     const getSubscriptionInfo = async () => {
         try {
@@ -92,28 +97,38 @@ const Plans = () => {
     const handleContinue = async (priceId) => {
         dispatch(showLoader());
         try {
-            const response = await stripeService.createCheckoutSession(
-                { priceId },
-                { headers: { "x-platform": "mobile" } } // make sure your service sends this header
+            const successRedirectUrl = Linking.createURL("stripe/success");
+            const cancelRedirectUrl = Linking.createURL("stripe/cancel");
+
+            const response = await stripeService.createCheckoutSession({
+                priceId,
+                successRedirectUrl,
+                cancelRedirectUrl,
+            });
+
+            if (!response.url) {
+                showToast("error", "Unable to start checkout.");
+                return;
+            }
+
+            dispatch(hideLoader());
+
+            const result = await WebBrowser.openAuthSessionAsync(
+                response.url,
+                successRedirectUrl
             );
 
-            if (response.url) {
-                const result = await WebBrowser.openAuthSessionAsync(
-                    response.url,
-                    "truckby://stripe/success" // must match your registered scheme + success path
-                );
-
-                if (result.type === "success") {
-                    showToast("success", "Subscription successful!");
-                    dispatch(fetchUserInfo());
-                    getSubscriptionInfo();
-                } else if (result.type === "cancel" || result.type === "dismiss") {
-                    showToast("info", "Checkout cancelled");
+            if (result.type === "success") {
+                if (result.url?.includes("stripe/cancel")) {
+                    showToast("info", "Checkout cancelled.");
+                } else {
+                    navigation.navigate("Success");
                 }
+            } else if (result.type === "cancel" || result.type === "dismiss") {
+                showToast("info", "Checkout cancelled.");
             }
         } catch (error) {
             showToast("error", error?.response?.data?.error || "Something went wrong");
-        } finally {
             dispatch(hideLoader());
         }
     };

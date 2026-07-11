@@ -4,7 +4,7 @@ import * as SecureStore from 'expo-secure-store';
 import store from '../redux/store.js';
 import { setAuth, clearAuth } from '../redux/authSlice.js';
 
-const { baseUrl } = Constants.expoConfig.extra;
+const baseUrl = process.env.EXPO_PUBLIC_BASE_URL;
 
 const axiosInstance = axios.create({
     baseURL: baseUrl,

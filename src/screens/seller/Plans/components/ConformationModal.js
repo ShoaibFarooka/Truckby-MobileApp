@@ -25,7 +25,7 @@ const SuccessPage = () => {
 
                 <TouchableOpacity
                     style={styles.button}
-                    onPress={() => navigation.navigate("SellerListing")}
+                    onPress={() => navigation.navigate("Listing")}
                 >
                     <Text style={styles.buttonText}>Get started</Text>
                 </TouchableOpacity>

@@ -30,11 +30,6 @@
       "expo-video",
       "expo-web-browser"
     ],
-    "extra": {
-      "baseUrl": "https://x6t2pkqf-5778.inc1.devtunnels.ms/"
-    },
-    "expo": {
-      "scheme": "truckby"
-    }
+    "scheme": "truckby"
   }
 }
