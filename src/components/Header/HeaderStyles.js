@@ -5,12 +5,12 @@ export const styles = StyleSheet.create({
         backgroundColor: '#fff',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        elevation: 2,
+        elevation: 10,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.2,
         shadowRadius: 1.41,
-        zIndex: 1
+        zIndex: 10
     },
     subContainer: {
         flexDirection: 'row',
