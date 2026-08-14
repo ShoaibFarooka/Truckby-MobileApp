@@ -1,4 +1,5 @@
-import { View, Text, Image, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
+import { Image } from 'expo-image';
 import { useState, useRef, useEffect } from 'react';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
@@ -6,6 +7,7 @@ import { styles } from './TruckCardStyles';
 
 const { width: screenWidth } = Dimensions.get('window');
 const CARD_WIDTH = (screenWidth - 24) / 2; // 2 columns with padding
+const blurhash = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4';
 
 const formatNumberWithCommas = (num) => {
     if (num === null || num === undefined || num === '') return '';
@@ -58,7 +60,12 @@ const TruckCard = ({ images = [], title, price, location, miles, data }) => {
                                 key={index}
                                 source={{ uri: img }}
                                 style={[styles.image, { width: CARD_WIDTH }]}
-                                resizeMode="cover"
+                                contentFit="cover"
+                                placeholder={{ blurhash }}
+                                transition={150}
+                                cachePolicy="disk"
+                                priority={index === 0 ? 'normal' : 'low'}
+                                recyclingKey={img}
                             />
                         ))
                     ) : (

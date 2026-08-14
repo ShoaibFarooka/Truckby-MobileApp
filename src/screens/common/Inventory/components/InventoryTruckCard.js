@@ -2,11 +2,11 @@ import React, { useState, useRef, useEffect } from "react";
 import {
     View,
     Text,
-    Image,
     TouchableOpacity,
     ScrollView,
     Dimensions,
 } from "react-native";
+import { Image } from 'expo-image';
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
@@ -16,6 +16,7 @@ import styles from "./InventoryTruckCardStyles";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width - 32;
+const blurhash = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4';
 
 export default function InventoryTruckCard({ data }) {
     const navigation = useNavigation();
@@ -79,9 +80,15 @@ export default function InventoryTruckCard({ data }) {
                             onPress={handleView}
                         >
                             <Image
+                                key={index}
                                 source={{ uri: img }}
                                 style={[styles.image, { width: CARD_WIDTH }]}
-                                resizeMode="cover"
+                                contentFit="cover"
+                                placeholder={{ blurhash }}
+                                transition={150}
+                                cachePolicy="disk"
+                                priority={index === 0 ? 'normal' : 'low'}
+                                recyclingKey={img}
                             />
                         </TouchableOpacity>
                     ))}

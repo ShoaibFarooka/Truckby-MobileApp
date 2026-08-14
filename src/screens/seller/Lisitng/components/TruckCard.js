@@ -1,5 +1,6 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity } from "react-native";
+import { Image } from 'expo-image';
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { formatNumberWithCommas } from "../../../../utils/extra";
@@ -7,6 +8,7 @@ import { styles } from "./TruckCardStyles";
 
 
 const placeholderImage = require("../../../../../assets/images/card.png");
+const blurhash = 'L6PZfSi_.AyE_3t7t7R**0o#DgR4';
 
 export default function TruckCard({ data, handleDeleteClick }) {
     const navigation = useNavigation();
@@ -16,8 +18,14 @@ export default function TruckCard({ data, handleDeleteClick }) {
 
     return (
         <View style={styles.card}>
-            <Image source={imageSource} style={styles.image} />
-
+            <Image
+                source={imageSource}
+                style={styles.image}
+                contentFit="cover"
+                placeholder={{ blurhash }}
+                transition={150}
+                cachePolicy="disk"
+            />
             <View style={styles.body}>
                 <View style={styles.headerRow}>
                     <Text style={styles.title}>{data?.vehicleName?.toUpperCase()}</Text>
