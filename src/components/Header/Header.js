@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { View, Text, Image, TouchableOpacity, Pressable } from "react-native";
+import { View, Text, TouchableOpacity, Pressable } from "react-native";
+import { Image } from 'expo-image';
 import { styles } from "./HeaderStyles";
 import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
@@ -73,7 +74,7 @@ const Header = () => {
         <View style={styles.container}>
             <View style={styles.subContainer}>
                 <TouchableOpacity onPress={() => handleNavigate('Home')}>
-                    <Image source={logo} alt="Truckby" style={styles.logo} />
+                    <Image source={logo} style={styles.logo} contentFit="contain" />
                 </TouchableOpacity>
                 <TouchableOpacity
                     onPress={toggleMenu}
@@ -126,8 +127,10 @@ const Header = () => {
                                 style={styles.profileContainer}
                             >
                                 <Image
-                                    source={user?.image ? { uri: user.image } : profile}
+                                    source={user?.image ? user.image : profile}
                                     style={styles.profileImage}
+                                    contentFit="cover"
+                                    cachePolicy="memory-disk"
                                 />
                                 <Text style={styles.profileName}>
                                     {user.userName?.split('@')[0].slice(0, 10)}
@@ -144,6 +147,7 @@ const Header = () => {
                             {isProfileOpen && (
                                 <View style={styles.dropdown}>
                                     <TouchableOpacity
+                                        style={{ width: "100%" }}
                                         onPress={() => {
                                             setIsProfileOpen(false);
                                             handleNavigate('Profile');
@@ -152,7 +156,10 @@ const Header = () => {
                                         <Text style={styles.dropdownItem}>Profile</Text>
                                     </TouchableOpacity>
 
-                                    <TouchableOpacity onPress={handleLogout}>
+                                    <TouchableOpacity
+                                        style={{ width: "100%" }}
+                                        onPress={handleLogout}
+                                    >
                                         <Text style={[styles.dropdownItem, { color: 'red' }]}>
                                             Log out
                                         </Text>

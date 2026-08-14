@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
-    View, Text, Image, ScrollView,
+    View, Text, ScrollView,
     TouchableOpacity, Dimensions,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './ImageCarouselStyles';
 
@@ -12,7 +13,6 @@ const ImageCarousel = ({ images = [] }) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const scrollRef = useRef(null);
 
-    // Auto-swipe every 3 seconds
     useEffect(() => {
         if (images.length <= 1) return;
         const interval = setInterval(() => {
@@ -35,7 +35,6 @@ const ImageCarousel = ({ images = [] }) => {
 
     return (
         <View style={styles.wrapper}>
-            {/* Images */}
             <ScrollView
                 ref={scrollRef}
                 horizontal
@@ -50,14 +49,15 @@ const ImageCarousel = ({ images = [] }) => {
                 {images.map((img, index) => (
                     <Image
                         key={index}
-                        source={{ uri: img }}
-                        style={styles.image}
-                        resizeMode="cover"
+                        source={img}
+                        style={[styles.image, { width: screenWidth }]}
+                        contentFit="cover"
+                        cachePolicy="memory-disk"
+                        transition={200}
                     />
                 ))}
             </ScrollView>
 
-            {/* Left Arrow */}
             {activeIndex > 0 && (
                 <TouchableOpacity
                     style={[styles.arrow, styles.arrowLeft]}
@@ -68,7 +68,6 @@ const ImageCarousel = ({ images = [] }) => {
                 </TouchableOpacity>
             )}
 
-            {/* Right Arrow */}
             {activeIndex < images.length - 1 && (
                 <TouchableOpacity
                     style={[styles.arrow, styles.arrowRight]}
@@ -79,7 +78,6 @@ const ImageCarousel = ({ images = [] }) => {
                 </TouchableOpacity>
             )}
 
-            {/* Dots */}
             {images.length > 1 && (
                 <View style={styles.dotsContainer}>
                     {images.map((_, index) => (
