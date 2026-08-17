@@ -145,76 +145,82 @@ const Plans = () => {
                     </View>
 
                     {products?.length > 0 ? (
-                        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                            <View style={styles.table}>
-                                {/* Header row: label + each plan's price/button */}
-                                <View style={styles.row}>
-                                    <View style={styles.labelCell}>
-                                        <Text style={styles.labelCellText}>Compare plans</Text>
-                                    </View>
-
-                                    {products.map((plan, idx) => {
-                                        const isCurrentPlan = info.status && plan.productId === info.productId;
-                                        return (
-                                            <View key={idx} style={styles.headerCell}>
-                                                <View style={styles.priceRow}>
-                                                    <Text style={styles.priceText}>${plan.price}</Text>
-                                                    <Text style={styles.priceSuffix}>
-                                                        /{plan.duration > 1 ? plan.duration : ""}month
-                                                    </Text>
-                                                </View>
-                                                <TouchableOpacity
-                                                    disabled={info.status}
-                                                    onPress={() => {
-                                                        if (info.status) {
-                                                            showToast("error", "You already have a subscription");
-                                                            return;
-                                                        }
-                                                        handleContinue(plan.priceId);
-                                                    }}
-                                                    style={[
-                                                        styles.planButton,
-                                                        isCurrentPlan && styles.planButtonDisabled,
-                                                    ]}
-                                                >
-                                                    <Text style={styles.planButtonText}>{plan.name}</Text>
-                                                </TouchableOpacity>
-                                            </View>
-                                        );
-                                    })}
-                                </View>
-
-                                {/* Listings included row */}
-                                <View style={styles.row}>
-                                    <View style={styles.labelCell}>
-                                        <Text style={styles.labelCellText}>Listings Included</Text>
-                                    </View>
-                                    {products.map((plan, i) => (
-                                        <View key={i} style={styles.dataCell}>
-                                            <Text style={styles.dataCellBoldText}>{plan.listings}</Text>
-                                        </View>
-                                    ))}
-                                </View>
-
-                                {/* Feature rows */}
-                                {allFeatures.map((feature, idx) => (
-                                    <View key={idx} style={styles.row}>
-                                        <View style={styles.labelCell}>
-                                            <Text style={styles.labelCellText}>{feature}</Text>
-                                        </View>
-                                        {products.map((plan, i) => (
-                                            <View key={i} style={styles.dataCell}>
-                                                {plan.features.includes(feature) ? (
-                                                    <Ionicons name="checkmark" size={18} color="#10B981" />
-                                                ) : (
-                                                    <Text style={styles.dataCellText}>-</Text>
+                        <View style={styles.planList}>
+                            {products.map((plan, idx) => {
+                                const isCurrentPlan = info.status && plan.productId === info.productId;
+                                return (
+                                    <View
+                                        key={idx}
+                                        style={[styles.planCard, isCurrentPlan && styles.planCardCurrent]}
+                                    >
+                                        {/* Plan name + price */}
+                                        <View style={styles.planCardHeader}>
+                                            <View style={styles.planNameWrap}>
+                                                <Text style={styles.planName}>{plan.name}</Text>
+                                                {isCurrentPlan && (
+                                                    <View style={styles.currentBadge}>
+                                                        <Text style={styles.currentBadgeText}>Current Plan</Text>
+                                                    </View>
                                                 )}
                                             </View>
-                                        ))}
+                                            <View style={styles.priceRow}>
+                                                <Text style={styles.priceText}>${plan.price}</Text>
+                                                <Text style={styles.priceSuffix}>
+                                                    /{plan.duration > 1 ? plan.duration : ""}month
+                                                </Text>
+                                            </View>
+                                        </View>
+
+                                        {/* Listings included */}
+                                        <View style={styles.listingsRow}>
+                                            <Text style={styles.listingsLabel}>Listings Included</Text>
+                                            <Text style={styles.listingsValue}>{plan.listings}</Text>
+                                        </View>
+
+                                        {/* Features */}
+                                        <View style={styles.featureList}>
+                                            {allFeatures.map((feature, i) => {
+                                                const included = plan.features.includes(feature);
+                                                return (
+                                                    <View key={i} style={styles.featureRow}>
+                                                        {included ? (
+                                                            <Ionicons name="checkmark" size={18} color="#10B981" />
+                                                        ) : (
+                                                            <Ionicons name="close" size={18} color="#9ca3af" />
+                                                        )}
+                                                        <Text
+                                                            style={[
+                                                                styles.featureText,
+                                                                !included && styles.featureTextDisabled,
+                                                            ]}
+                                                        >
+                                                            {feature}
+                                                        </Text>
+                                                    </View>
+                                                );
+                                            })}
+                                        </View>
+
+                                        <TouchableOpacity
+                                            disabled={info.status}
+                                            onPress={() => {
+                                                if (info.status) {
+                                                    showToast("error", "You already have a subscription");
+                                                    return;
+                                                }
+                                                handleContinue(plan.priceId);
+                                            }}
+                                            style={[
+                                                styles.planButton,
+                                                isCurrentPlan && styles.planButtonDisabled,
+                                            ]}
+                                        >
+                                            <Text style={styles.planButtonText}>{plan.name}</Text>
+                                        </TouchableOpacity>
                                     </View>
-                                ))}
-                            </View>
-                        </ScrollView>
+                                );
+                            })}
+                        </View>
                     ) : (
                         <View style={styles.emptyState}>
                             <Text style={styles.emptyStateText}>No plans available right now.</Text>

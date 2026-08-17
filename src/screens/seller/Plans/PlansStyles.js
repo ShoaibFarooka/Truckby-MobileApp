@@ -1,13 +1,5 @@
 import { StyleSheet } from "react-native";
 
-const LABEL_COL_WIDTH = 160;
-const PLAN_COL_WIDTH = 150;
-
-export const COLUMN_WIDTHS = {
-    LABEL_COL_WIDTH,
-    PLAN_COL_WIDTH,
-};
-
 export const styles = StyleSheet.create({
     screen: {
         flex: 1,
@@ -48,43 +40,52 @@ export const styles = StyleSheet.create({
         fontWeight: "400",
     },
 
-    table: {
+    /* Stacked plan cards */
+    planList: {
+        gap: 16,
+    },
+    planCard: {
         borderWidth: 1,
         borderColor: "#E6E9F5",
+        borderRadius: 14,
+        padding: 16,
+        backgroundColor: "#ffffff",
     },
-    row: {
+    planCardCurrent: {
+        borderColor: "#DF0805",
+        backgroundColor: "#FEF6F6",
+    },
+    planCardHeader: {
         flexDirection: "row",
-    },
-
-    /* Label column (left-most, sticky-feeling fixed width) */
-    labelCell: {
-        width: LABEL_COL_WIDTH,
-        paddingHorizontal: 12,
-        paddingVertical: 14,
-        borderWidth: 1,
-        borderColor: "#E6E9F5",
-        justifyContent: "center",
-    },
-    labelCellText: {
-        fontSize: 14,
-        color: "#111827",
-        textAlign: "left",
-    },
-
-    /* Plan/price column header cell */
-    headerCell: {
-        width: PLAN_COL_WIDTH,
-        paddingHorizontal: 10,
-        paddingVertical: 14,
-        borderWidth: 1,
-        borderColor: "#E6E9F5",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "space-between",
+        flexWrap: "wrap",
+        gap: 8,
+    },
+    planNameWrap: {
+        flexShrink: 1,
+        gap: 6,
+    },
+    planName: {
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#111827",
+    },
+    currentBadge: {
+        alignSelf: "flex-start",
+        paddingHorizontal: 8,
+        paddingVertical: 3,
+        borderRadius: 999,
+        backgroundColor: "#DF0805",
+    },
+    currentBadgeText: {
+        color: "#ffffff",
+        fontSize: 11,
+        fontWeight: "600",
     },
     priceRow: {
         flexDirection: "row",
         alignItems: "flex-end",
-        justifyContent: "center",
         flexWrap: "wrap",
     },
     priceText: {
@@ -98,10 +99,10 @@ export const styles = StyleSheet.create({
         marginLeft: 2,
     },
     planButton: {
-        marginTop: 10,
-        paddingVertical: 10,
+        marginTop: 16,
+        paddingVertical: 12,
         paddingHorizontal: 8,
-        borderRadius: 6,
+        borderRadius: 8,
         backgroundColor: "#DF0805",
         width: "100%",
         alignItems: "center",
@@ -116,28 +117,43 @@ export const styles = StyleSheet.create({
         textAlign: "center",
     },
 
-    /* Data cell */
-    dataCell: {
-        width: PLAN_COL_WIDTH,
-        paddingHorizontal: 10,
-        paddingVertical: 14,
-        borderWidth: 1,
-        borderColor: "#E6E9F5",
+    /* Listings included */
+    listingsRow: {
+        flexDirection: "row",
         alignItems: "center",
-        justifyContent: "center",
+        justifyContent: "space-between",
+        marginTop: 14,
+        paddingTop: 12,
+        borderTopWidth: 1,
+        borderTopColor: "#E6E9F5",
     },
-    dataCellBoldText: {
+    listingsLabel: {
+        fontSize: 14,
+        color: "#6b7280",
+    },
+    listingsValue: {
         fontSize: 16,
         fontWeight: "bold",
         color: "#111827",
     },
-    dataCellText: {
+
+    /* Features */
+    featureList: {
+        marginTop: 12,
+        gap: 8,
+    },
+    featureRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 8,
+    },
+    featureText: {
         fontSize: 14,
         color: "#111827",
+        flexShrink: 1,
     },
-    tickIcon: {
-        width: 16,
-        height: 16,
+    featureTextDisabled: {
+        color: "#9ca3af",
     },
 
     emptyState: {
