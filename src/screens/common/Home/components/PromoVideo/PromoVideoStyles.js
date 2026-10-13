@@ -8,10 +8,10 @@ export const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     video: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
     },
     loader: {
-        ...StyleSheet.absoluteFillObject,
+        ...StyleSheet.absoluteFill,
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1,
