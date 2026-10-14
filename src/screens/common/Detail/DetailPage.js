@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { showLoader, hideLoader } from '../../../redux/loaderSlice';
 import truckService from '../../../services/truckService';
@@ -93,11 +93,13 @@ const DetailPage = ({ route }) => {
     };
 
     return (
-        <ScrollView keyboardShouldPersistTaps="handled" style={styles.container} showsVerticalScrollIndicator={false}>
+        // Plain View: Layout already provides the ScrollView, and a nested
+        // vertical ScrollView competes with it for touches
+        <View style={styles.container}>
             <ImageCarousel images={data?.images || []} />
             <Info data={data} />
             <DetailInfo data={sampleData} />
-        </ScrollView>
+        </View>
     );
 };
 
