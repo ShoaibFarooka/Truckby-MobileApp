@@ -94,11 +94,10 @@ const Form = () => {
             aspect: [1, 1], // makes it square
         });
 
-        console.log("Upload: ", result.assets[0]);
+        // assets is null when the user cancels, so check before reading it
+        if (result.canceled || !result.assets?.length) return;
 
-        if (!result.canceled) {
-            setImage(result.assets[0]);
-        }
+        setImage(result.assets[0]);
     };
 
     const handleSubmit = async (values) => {
