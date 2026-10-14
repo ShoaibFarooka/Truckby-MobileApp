@@ -5,7 +5,6 @@ import {
     TextInput,
     Pressable,
     Image,
-    ScrollView,
     FlatList,
 } from "react-native";
 import { Dropdown } from 'react-native-element-dropdown';
@@ -18,6 +17,7 @@ import { useDispatch } from 'react-redux';
 import { hideLoader, showLoader } from '../../../redux/loaderSlice';
 import truckService from '../../../services/truckService';
 import { useNavigation } from '@react-navigation/native';
+import useHideLoaderAfterRender from '../../../hooks/useHideLoaderAfterRender';
 
 import Aggregateandmining from '../../../../assets/images/trucks/Aggregateandmining.png';
 import Constructionequipment from '../../../../assets/images/trucks/Constructionequipment.png';
@@ -54,6 +54,7 @@ const Home = () => {
 
     const dispatch = useDispatch();
     const navigation = useNavigation();
+    const hideLoaderAfterRender = useHideLoaderAfterRender();
 
     const listingTypes = [
         { label: 'For Sale', value: 'For Sale' },
@@ -106,9 +107,10 @@ const Home = () => {
                 currentPage: pageIndex
             });
             setPage(pageIndex);
+            // Keep the loader up until the new cards are laid out and painted
+            hideLoaderAfterRender();
         } catch (error) {
             console.log('ERROR:', error.message);
-        } finally {
             dispatch(hideLoader());
         }
     };
@@ -243,11 +245,9 @@ const Home = () => {
     };
 
     return (
-        <ScrollView
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.scrollContainer}
-        >
+        // Plain View: Layout already provides the ScrollView, and a nested
+        // vertical ScrollView competes with it for touches
+        <View style={styles.scrollContainer}>
 
             <View style={styles.container}>
 
@@ -450,7 +450,7 @@ const Home = () => {
 
             </View>
 
-        </ScrollView>
+        </View>
     )
 };
 

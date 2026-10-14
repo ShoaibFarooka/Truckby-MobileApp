@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
     View,
     Text,
-    ScrollView,
     TextInput,
     Pressable,
     FlatList,
@@ -22,6 +21,7 @@ import { truckSubCategories } from "../../../data/Content";
 import truckService from "../../../services/truckService";
 import { useDispatch } from "react-redux";
 import { showLoader, hideLoader } from "../../../redux/loaderSlice";
+import useHideLoaderAfterRender from "../../../hooks/useHideLoaderAfterRender";
 
 const useDebounce = (value, delay = 500) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -40,6 +40,7 @@ const FilterPage = () => {
     const route = useRoute();
     const insets = useSafeAreaInsets();
     const dispatch = useDispatch();
+    const hideLoaderAfterRender = useHideLoaderAfterRender();
 
     const {
         searchText: initialSearchText = "",
@@ -132,19 +133,18 @@ const FilterPage = () => {
             });
 
             setCurrentPage(pageIndex);
+            // Keep the loader up until the new cards are laid out and painted
+            hideLoaderAfterRender();
 
         } catch (error) {
             console.log("FETCH TRUCK ERROR:", error?.message);
+            dispatch(hideLoader());
         } finally {
             setLoading(false);
-            dispatch(hideLoader());
         }
     };
 
-    useEffect(() => {
-        fetchTrucks(1);
-    }, []);
-
+    // Also runs on mount, so no separate mount-only fetch is needed
     useEffect(() => {
         fetchTrucks(1);
     }, [
@@ -227,7 +227,9 @@ const FilterPage = () => {
     return (
         <View style={styles.container}>
 
-            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            {/* Plain View: Layout already provides the ScrollView, and a nested
+                vertical ScrollView competes with it for touches */}
+            <View>
 
                 {/* Top Search Section */}
                 <View style={styles.searchSection}>
@@ -355,7 +357,7 @@ const FilterPage = () => {
 
                 <View style={{ height: 40 }} />
 
-            </ScrollView>
+            </View>
 
             {/* Filter Modal */}
             <Modal

@@ -9,12 +9,27 @@ const PromoVideo = () => {
     const [isReady, setIsReady] = useState(false);
     const appState = useRef(AppState.currentState);
 
-    // Initialize player with local file
-    const player = useVideoPlayer(truckVideo, (p) => {
+    // Create the player empty: passing the source here loads it synchronously on
+    // the iOS UI thread, which freezes scrolling until the video has loaded
+    const player = useVideoPlayer(null, (p) => {
         p.loop = true;
         p.volume = 0;
-        p.play();
     });
+
+    useEffect(() => {
+        let cancelled = false;
+
+        // replaceAsync loads the asset off the UI thread
+        player.replaceAsync(truckVideo)
+            .then(() => {
+                if (!cancelled) player.play();
+            })
+            .catch((error) => console.log('PromoVideo load error:', error?.message));
+
+        return () => {
+            cancelled = true;
+        };
+    }, [player]);
 
     useEffect(() => {
         const subscription = AppState.addEventListener('change', (nextAppState) => {
