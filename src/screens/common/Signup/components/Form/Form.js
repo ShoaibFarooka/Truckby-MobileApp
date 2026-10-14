@@ -9,6 +9,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import { useState } from "react";
 import { Toast } from 'toastify-react-native'
+import { showApiError } from '../../../../../utils/apiError'
 import * as yup from "yup";
 import { countries } from "../../../../../data/countries";
 import { states } from "../../../../../data/states";
@@ -115,7 +116,7 @@ const Form = () => {
                 const response = await uploadImage(imgForm);
                 imageUrl = response?.urls[0] || "";
             } catch (error) {
-                Toast.error(error);
+                showApiError(error, "Image upload failed");
                 return;
             }
         }
@@ -139,7 +140,7 @@ const Form = () => {
             form.resetForm();
             navigation.replace("Login");
         } catch (error) {
-            Toast.error(error);
+            showApiError(error, "Unable to sign up. Please try again.");
         }
     };
 

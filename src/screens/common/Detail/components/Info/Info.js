@@ -6,6 +6,7 @@ import {
 import { Ionicons, FontAwesome, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Toast } from 'toastify-react-native';
 import truckService from '../../../../../services/truckService';
+import { getErrorMessage, isSessionExpiredError } from '../../../../../utils/apiError';
 import { styles } from './InfoStyles';
 
 const formatNumberWithCommas = (num) => {
@@ -68,8 +69,12 @@ const Info = ({ data }) => {
             Toast.success(response?.message || 'Message sent successfully!');
         } catch (error) {
             console.log('Error sending message:', error?.response?.data || error?.message);
-            const errorMessage = error?.response?.data?.error || error?.response?.data?.message;
-            setFormError(typeof errorMessage === 'string' ? errorMessage : 'Failed to send message. Please try again.');
+            if (isSessionExpiredError(error)) {
+                // The session-expired toast is already shown; close the popup so it's visible
+                setShowPopup(false);
+                return;
+            }
+            setFormError(getErrorMessage(error, 'Failed to send message. Please try again.'));
         } finally {
             setSending(false);
         }

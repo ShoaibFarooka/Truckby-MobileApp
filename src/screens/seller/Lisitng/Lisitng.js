@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { Toast } from "toastify-react-native";
+import { showApiError } from "../../../utils/apiError";
 import TruckCard from "./components/TruckCard";
 import ExpirePlan from "./components/ExpirePlan";
 import DeleteConfirmationModal from "../../../components/Delete/DeleteConformationModal.js";
@@ -38,7 +39,7 @@ const Listing = () => {
             setListData(response.data);
             setTotalPages(response.totalPages || 1);
         } catch (error) {
-            console.error("Error fetching services:", error);
+            showApiError(error, "Unable to load your listings");
         } finally {
             dispatch(hideLoader());
         }
@@ -62,8 +63,7 @@ const Listing = () => {
             Toast.success("Equipment deleted successfully");
             await fetchAllTrucks(page);
         } catch (error) {
-            console.error("Error deleting service:", error);
-            Toast.error("Failed to delete service");
+            showApiError(error, "Failed to delete equipment");
         } finally {
             dispatch(hideLoader());
             setDeleteOpen(false);
@@ -80,7 +80,7 @@ const Listing = () => {
                     setProductData(response.productData);
                 }
             } catch (error) {
-                Toast.error(error?.response?.data?.error || "Something went wrong");
+                showApiError(error, "Unable to load your subscription");
             } finally {
                 dispatch(hideLoader());
             }

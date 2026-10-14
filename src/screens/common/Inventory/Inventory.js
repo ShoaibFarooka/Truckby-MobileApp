@@ -12,6 +12,7 @@ import { useRoute } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { Toast } from "toastify-react-native";
+import { showApiError } from "../../../utils/apiError";
 
 import styles from "./InventoryStyles";
 
@@ -66,7 +67,7 @@ const Inventory = () => {
             // Keep the loader up until the new cards are laid out and painted
             hideLoaderAfterRender();
         } catch (error) {
-            Toast.error("Unable to fetch Inventory try again!");
+            showApiError(error, "Unable to fetch Inventory try again!");
             dispatch(hideLoader());
         }
     };

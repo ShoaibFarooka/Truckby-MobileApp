@@ -13,6 +13,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as ImagePicker from "expo-image-picker";
 import { Toast } from "toastify-react-native";
+import { showApiError } from "../../../utils/apiError";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -160,8 +161,7 @@ const AddTruck = () => {
                 }
                 navigation.navigate("Listing");
             } catch (error) {
-                Toast.error(error?.response?.data?.error || "Listing failed");
-                console.error("Listing error:", error);
+                showApiError(error, "Listing failed");
             } finally {
                 dispatch(hideLoader());
                 setSubmitting(false);

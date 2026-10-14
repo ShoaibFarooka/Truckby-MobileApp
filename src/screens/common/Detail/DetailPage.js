@@ -3,6 +3,7 @@ import { View, ScrollView } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { showLoader, hideLoader } from '../../../redux/loaderSlice';
 import truckService from '../../../services/truckService';
+import { showApiError } from '../../../utils/apiError';
 import ImageCarousel from './components/ImageCarousel/ImageCarousel';
 import Info from './components/Info/Info';
 import DetailInfo from './components/DetailInfo/DetailInfo';
@@ -36,7 +37,7 @@ const DetailPage = ({ route }) => {
                     const response = await truckService.getTruckById(id);
                     setData(response);
                 } catch (err) {
-                    console.error('Error fetching truck:', err);
+                    showApiError(err, 'Unable to load this listing');
                 } finally {
                     dispatch(hideLoader());
                 }

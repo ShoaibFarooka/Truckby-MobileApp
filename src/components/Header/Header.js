@@ -6,6 +6,7 @@ import Feather from '@expo/vector-icons/Feather';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { Toast } from 'toastify-react-native';
+import { showApiError } from '../../utils/apiError';
 import { useDispatch, useSelector } from "react-redux";
 import { showLoader, hideLoader } from "../../redux/loaderSlice";
 import { clearAuth } from "../../redux/authSlice";
@@ -64,7 +65,7 @@ const Header = () => {
             dispatch(clearAuth());
             navigation.replace("Login");
         } catch (error) {
-            Toast.error(error);
+            showApiError(error, "Unable to log out. Please try again.");
         } finally {
             dispatch(hideLoader());
         }

@@ -12,6 +12,7 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import * as ImagePicker from 'expo-image-picker';
 import { Toast } from 'toastify-react-native';
+import { showApiError } from '../../../utils/apiError';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserInfo } from '../../../redux/userSlice';
 import { hideLoader, showLoader } from '../../../redux/loaderSlice';
@@ -77,7 +78,7 @@ export default function SellerProfile() {
                 });
                 if (user?.image) setPreviewUrl(user.image);
             } catch (error) {
-                Toast.error(error?.response?.data?.error || 'Failed to load profile');
+                showApiError(error, 'Failed to load profile');
             } finally {
                 dispatch(hideLoader());
                 setLoading(false);
@@ -92,7 +93,7 @@ export default function SellerProfile() {
                     setAutoRenew(response.info.autoRenew ?? false);
                 }
             } catch (error) {
-                Toast.error(error?.response?.data?.error || 'Failed to load subscription');
+                showApiError(error, 'Failed to load subscription');
             }
         };
 
@@ -129,8 +130,8 @@ export default function SellerProfile() {
             await subscriptionService.ToggleAutoRenew();
             setAutoRenew((prev) => !prev);
             Toast.success('Auto Renew status updated');
-        } catch {
-            Toast.error('Failed to update Auto Renew');
+        } catch (error) {
+            showApiError(error, 'Failed to update Auto Renew');
         } finally {
             dispatch(hideLoader());
         }
@@ -152,8 +153,8 @@ export default function SellerProfile() {
                     Toast.error('Image upload failed');
                     return;
                 }
-            } catch {
-                Toast.error('Error uploading image');
+            } catch (error) {
+                showApiError(error, 'Error uploading image');
                 return;
             } finally {
                 dispatch(hideLoader());
@@ -170,7 +171,7 @@ export default function SellerProfile() {
             Toast.success('Profile updated successfully');
             dispatch(fetchUserInfo());
         } catch (error) {
-            Toast.error(error?.response?.data?.error || 'Update failed');
+            showApiError(error, 'Update failed');
         } finally {
             dispatch(hideLoader());
         }

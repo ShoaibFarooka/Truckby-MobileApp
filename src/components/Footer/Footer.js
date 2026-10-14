@@ -4,6 +4,7 @@ import { styles } from "./FooterStyles";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { Toast } from 'toastify-react-native';
+import { showApiError } from '../../utils/apiError';
 import { useDispatch, useSelector } from "react-redux";
 import { showLoader, hideLoader } from "../../redux/loaderSlice";
 import useApi from "../../hooks/useApi";
@@ -50,7 +51,7 @@ const Footer = () => {
             setEmail("");
             Toast.success(response.message);
         } catch (error) {
-            Toast.error(error);
+            showApiError(error, "Unable to subscribe. Please try again.");
         } finally {
             dispatch(hideLoader());
         }
@@ -61,7 +62,7 @@ const Footer = () => {
         if (supported) {
             await Linking.openURL(url);
         } else {
-            console.warn("Can't open URL:", url);
+            Toast.error("Unable to open this link");
         }
     };
 

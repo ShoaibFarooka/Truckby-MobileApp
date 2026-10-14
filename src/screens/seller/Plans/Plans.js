@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView } from "react-native";
 import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
-import { Toast } from "toastify-react-native";
+import { showApiError } from "../../../utils/apiError";
 import subscriptionService from "../../../services/subscriptionService";
 import productService from "../../../services/productService";
 import { showLoader, hideLoader } from "../../../redux/loaderSlice";
@@ -42,7 +42,7 @@ const Plans = () => {
             if (productsResponse.products) setProducts(productsResponse.products);
             if (infoResponse.info) setInfo(infoResponse.info);
         } catch (error) {
-            Toast.error(error?.response?.data?.error || "Something went wrong");
+            showApiError(error, "Something went wrong");
         } finally {
             setLoaded(true);
             dispatch(fetchUserInfo());
