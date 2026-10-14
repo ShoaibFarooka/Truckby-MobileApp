@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { View, Text, Image, TouchableOpacity, Linking, TextInput, KeyboardAvoidingView, Platform } from "react-native";
+import { View, Text, Image, TouchableOpacity, Linking, TextInput } from "react-native";
 import { styles } from "./FooterStyles";
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { useNavigation, useNavigationState } from "@react-navigation/native";
@@ -12,28 +12,46 @@ import truckService from "../../services/truckService";
 
 const logo = require("../../../assets/images/footer_logo.png");
 
+const quickLinks = [
+    { name: 'Home', screen: 'Home' },
+    { name: 'Browse Equipment', screen: 'Filter' },
+    { name: 'Contact Us', screen: 'ContactUs' },
+    { name: 'Privacy Policy', screen: 'Privacy' },
+];
+
+const accountLinks = [
+    { name: 'My Listings', screen: 'Listing' },
+    { name: 'My Inventory', screen: 'Inventory' },
+    { name: 'My Plan', screen: 'Plans' },
+];
+
+const guestLinks = [
+    { name: 'Log In', screen: 'Login' },
+    { name: 'Sign Up', screen: 'Signup' },
+];
+
+const socialLinks = [
+    { icon: 'facebook-f', url: 'https://www.facebook.com/profile.php?id=61576747834064&mibextid=LQQJ4d' },
+    { icon: 'instagram', url: 'https://www.instagram.com/truckbyapp?igsh=NTc4MTIwNjQ2YQ==' },
+];
+
 const Footer = () => {
     const [email, setEmail] = useState("");
 
     const routes = useNavigationState((state) => state.routes);
-    const currentRoute = routes[routes.length - 1];
-    const currentScreen = currentRoute?.name;
+    const currentScreen = routes[routes.length - 1]?.name;
 
     const { user } = useSelector((state) => state.auth);
-    const { execute, loading } = useApi(truckService.newsLetter);
+    const { execute } = useApi(truckService.newsLetter);
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
-    const navLinks = [
-        { name: 'Home', screen: 'Home', protected: false },
-        { name: 'Listing', screen: 'Listing', protected: true },
-        { name: 'Inventory', screen: 'Inventory', protected: true },
-        { name: 'My Plan', screen: 'Plans', protected: true },
-        { name: 'Privacy', screen: 'Privacy', protected: false },
-        { name: 'Contact Us', screen: 'ContactUs', protected: false },
-    ];
-
     const handleNavigate = (screen) => {
+        // Inventory shows a specific seller, so pass the current user's id
+        if (screen === 'Inventory') {
+            navigation.navigate('Inventory', { userId: user?._id });
+            return;
+        }
         navigation.navigate(screen);
     };
 
@@ -66,73 +84,92 @@ const Footer = () => {
         }
     };
 
+    const renderLink = (item) => {
+        const isActive = currentScreen === item.screen;
+        return (
+            <TouchableOpacity
+                key={item.screen}
+                onPress={() => handleNavigate(item.screen)}
+                style={styles.linkItem}
+                hitSlop={{ top: 6, bottom: 6 }}
+            >
+                <Text style={[styles.linkText, isActive && styles.linkTextActive]}>{item.name}</Text>
+            </TouchableOpacity>
+        );
+    };
+
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={() => handleNavigate('Home')}>
-                <Image source={logo} alt="Trucby" style={styles.logo} />
-            </TouchableOpacity>
+            {/* ── Brand ── */}
+            <View style={styles.brand}>
+                <TouchableOpacity onPress={() => handleNavigate('Home')}>
+                    <Image source={logo} alt="Truckby" style={styles.logo} />
+                </TouchableOpacity>
+                <Text style={styles.tagline}>
+                    Buy, sell and lease trucks and equipment with confidence.
+                </Text>
+            </View>
 
-            <View style={styles.subContainer}>
-                <Text style={styles.inputLabel}>Newsletter</Text>
-                <View>
+            {/* ── Newsletter ── */}
+            <View style={styles.newsletter}>
+                <Text style={styles.sectionTitle}>Newsletter</Text>
+                <Text style={styles.newsletterText}>Get the latest listings and updates in your inbox.</Text>
+                <View style={styles.inputWrapper}>
                     <TextInput
                         placeholder="Enter your email"
                         keyboardType="email-address"
+                        autoCapitalize="none"
                         style={styles.input}
                         placeholderTextColor="#9ca3af"
                         value={email}
-                        onChangeText={(value) => setEmail(value)}
+                        onChangeText={setEmail}
+                        onSubmitEditing={handleSend}
+                        returnKeyType="send"
                     />
                     <TouchableOpacity
                         onPress={handleSend}
-                        style={styles.iconContainer}
+                        style={styles.sendButton}
                         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                     >
-                        <FontAwesome6 name="location-arrow" size={18} color="#fff" />
+                        <FontAwesome6 name="location-arrow" size={16} color="#fff" />
                     </TouchableOpacity>
                 </View>
             </View>
 
-            <View style={styles.menuContainer}>
-                {navLinks.map((item, index) => {
-                    if (item.protected && !user) return null;
+            {/* ── Links ── */}
+            <View style={styles.linkColumns}>
+                <View style={styles.linkColumn}>
+                    <Text style={styles.sectionTitle}>Quick Links</Text>
+                    {quickLinks.map(renderLink)}
+                </View>
 
-                    return (
+                <View style={styles.linkColumn}>
+                    <Text style={styles.sectionTitle}>{user ? 'My Account' : 'Account'}</Text>
+                    {(user ? accountLinks : guestLinks).map(renderLink)}
+                </View>
+            </View>
+
+            {/* ── Bottom bar ── */}
+            <View style={styles.divider} />
+
+            <View style={styles.bottomBar}>
+                <View style={styles.socialRow}>
+                    {socialLinks.map((social) => (
                         <TouchableOpacity
-                            key={index}
-                            onPress={() => handleNavigate(item.screen)}
-                            style={[styles.menuItem, currentScreen === item.screen && styles.menuItemBorderBottom]}
+                            key={social.icon}
+                            onPress={() => handleOpenLink(social.url)}
+                            style={styles.socialButton}
+                            hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}
                         >
-                            <Text style={[styles.menuText, currentScreen === item.screen && styles.activeText]}>{item.name}</Text>
+                            <FontAwesome6 name={social.icon} size={16} color="#fff" />
                         </TouchableOpacity>
-                    );
-                })}
+                    ))}
+                </View>
+
+                <Text style={styles.copyrightText}>© {new Date().getFullYear()} Truckby. All rights reserved.</Text>
             </View>
-
-            <View style={styles.socialLinksContainer}>
-                <TouchableOpacity
-                    onPress={() => handleOpenLink("https://www.facebook.com/profile.php?id=61576747834064&mibextid=LQQJ4d")}
-                    style={styles.socialLink}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                    <FontAwesome6 name="facebook-f" size={24} color="#fff" />
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    onPress={() => handleOpenLink("https://www.instagram.com/truckbyapp?igsh=NTc4MTIwNjQ2YQ==")}
-                    style={styles.socialLink}
-                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                >
-                    <FontAwesome6 name="instagram" size={24} color="#fff" />
-                </TouchableOpacity>
-            </View>
-
-            <View>
-                <Text style={styles.copyrightText}>© Copyright {new Date().getFullYear()} - Truckbyٖ</Text>
-            </View>
-
         </View>
-    )
+    );
 };
 
 export default Footer;
