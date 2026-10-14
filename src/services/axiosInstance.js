@@ -8,6 +8,9 @@ import { createSessionExpiredError } from '../utils/apiError.js';
 
 const baseUrl = process.env.EXPO_PUBLIC_BASE_URL;
 
+// Photo uploads can take minutes on a slow connection; still capped so a stalled upload can't hang the loader
+export const UPLOAD_TIMEOUT = 180000;
+
 const axiosInstance = axios.create({
     baseURL: baseUrl,
     // Fail hung requests so the global loader (hidden in each caller's finally) can't stay up forever

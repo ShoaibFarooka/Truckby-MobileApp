@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -9,6 +8,7 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { Dropdown } from 'react-native-element-dropdown';
 import * as ImagePicker from 'expo-image-picker';
 import { Toast } from 'toastify-react-native';
@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserInfo } from '../../../redux/userSlice';
 import { hideLoader, showLoader } from '../../../redux/loaderSlice';
 import userService from '../../../services/userService';
-import { uploadImg } from '../../../services/image';
+import useImageUpload from '../../../hooks/useImageUpload';
 import subscriptionService from '../../../services/subscriptionService';
 import { styles } from './ProfileStyles';
 
@@ -37,6 +37,7 @@ function ToggleSwitch({ checked, onChange }) {
 
 export default function SellerProfile() {
     const dispatch = useDispatch();
+    const authUser = useSelector((state) => state.auth.user);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -51,8 +52,9 @@ export default function SellerProfile() {
         image: '',
     });
 
-    const [imageFile, setImageFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
+    const { prepare: prepareImage, clear: clearImage, upload: uploadImage } = useImageUpload();
+    // Start with the photo already in Redux (the Header has it cached) instead of waiting for the fetch
+    const [previewUrl, setPreviewUrl] = useState(authUser?.image || null);
     const [loading, setLoading] = useState(true);
     const [info, setInfo] = useState({ status: false, planName: '' });
     const [autoRenew, setAutoRenew] = useState(false);
@@ -115,13 +117,9 @@ export default function SellerProfile() {
         });
         if (result.canceled || !result.assets?.length) return;
         const asset = result.assets[0];
-        const ext = asset.uri.split('.').pop();
         setPreviewUrl(asset.uri);
-        setImageFile({
-            uri: asset.uri,
-            type: asset.mimeType || `image/${ext === 'jpg' ? 'jpeg' : ext}`,
-            name: `profile.${ext}`,
-        });
+        // Shrink it now on the device; it is only uploaded on save
+        prepareImage(asset);
     };
 
     const handleAutoRenewToggle = async () => {
@@ -141,34 +139,31 @@ export default function SellerProfile() {
     const handleSubmit = async () => {
         let finalData = { ...formData };
 
-        if (imageFile) {
-            dispatch(showLoader());
-            try {
-                const form = new FormData();
-                form.append('images', imageFile);
-                const res = await uploadImg(form);
-                if (res?.success && res?.urls?.length > 0) {
-                    finalData.image = res.urls[0];
-                } else {
-                    Toast.error('Image upload failed');
-                    return;
-                }
-            } catch (error) {
-                showApiError(error, 'Error uploading image');
-                return;
-            } finally {
-                dispatch(hideLoader());
+        dispatch(showLoader());
+        try {
+            // Uploads the already-shrunk photo; null when no new photo was picked
+            const imageUrl = await uploadImage();
+            if (imageUrl) {
+                finalData.image = imageUrl;
+                // Start downloading the new photo now so the Header shows it as soon as the profile saves
+                Image.prefetch(imageUrl, 'memory-disk').catch(() => {});
             }
+        } catch (error) {
+            showApiError(error, 'Error uploading image');
+            dispatch(hideLoader());
+            return;
         }
 
         try {
-            dispatch(showLoader());
             const response = await userService.updateUserInfo(finalData);
             if (!response) {
                 Toast.error('Update failed');
                 return;
             }
             Toast.success('Profile updated successfully');
+            // The photo is saved now; don't upload it again on the next save
+            clearImage();
+            setFormData(finalData);
             dispatch(fetchUserInfo());
         } catch (error) {
             showApiError(error, 'Update failed');
@@ -195,7 +190,13 @@ export default function SellerProfile() {
                         <View style={styles.avatarRow}>
                             <TouchableOpacity style={styles.avatarWrapper} onPress={pickImage} activeOpacity={0.8}>
                                 {previewUrl ? (
-                                    <Image source={{ uri: previewUrl }} style={styles.avatarImage} />
+                                    <Image
+                                        source={{ uri: previewUrl }}
+                                        style={styles.avatarImage}
+                                        contentFit="cover"
+                                        cachePolicy="memory-disk"
+                                        transition={150}
+                                    />
                                 ) : (
                                     <View style={styles.avatarPlaceholder}>
                                         <Text style={styles.avatarPlaceholderText}>No Image</Text>

@@ -15,7 +15,7 @@ import { countries } from "../../../../../data/countries";
 import { states } from "../../../../../data/states";
 import useForm from "../../../../../hooks/useForm";
 import useApi from "../../../../../hooks/useApi";
-import uploadService from "../../../../../services/uploadService";
+import useImageUpload from "../../../../../hooks/useImageUpload";
 import userService from "../../../../../services/userService";
 
 const schema = yup.object().shape({
@@ -52,7 +52,7 @@ const Form = () => {
     };
     const form = useForm(initialValues, schema);
     const { execute, loading } = useApi(userService.registerUser);
-    const { execute: uploadImage, loading: uploading } = useApi(uploadService.uploadImg)
+    const { prepare: prepareImage, clear: clearImage, upload: uploadImage, uploading } = useImageUpload();
     const [secure, setSecure] = useState(true);
     const [confirmSecure, setConfirmSecure] = useState(true);
     const [image, setImage] = useState(null);
@@ -78,26 +78,23 @@ const Form = () => {
         if (result.canceled || !result.assets?.length) return;
 
         setImage(result.assets[0]);
+        // Shrink it now on the device; it is only uploaded on submit
+        prepareImage(result.assets[0]);
+    };
+
+    const handleClearImage = () => {
+        setImage(null);
+        clearImage();
     };
 
     const handleSubmit = async (values) => {
         let imageUrl = '';
-        if (image && image.uri) {
-            const imgForm = new FormData();
-
-            const imageData = {
-                uri: image.uri,
-                name: image.fileName,
-                type: image.mimeType
-            };
-            imgForm.append('images', imageData);
-            try {
-                const response = await uploadImage(imgForm);
-                imageUrl = response?.urls[0] || "";
-            } catch (error) {
-                showApiError(error, "Image upload failed");
-                return;
-            }
+        try {
+            // The photo was already shrunk when picked, so this upload is small
+            imageUrl = (await uploadImage()) || '';
+        } catch (error) {
+            showApiError(error, "Image upload failed");
+            return;
         }
 
         const payload = {
@@ -137,7 +134,7 @@ const Form = () => {
                     )}
                 </Pressable>
                 {(image && image.uri) && (
-                    <Pressable onPress={() => setImage(null)} style={({ pressed }) => [styles.clearButton, pressed && styles.buttonPressed]}>
+                    <Pressable onPress={handleClearImage} style={({ pressed }) => [styles.clearButton, pressed && styles.buttonPressed]}>
                         <Ionicons name="close" size={16} color="white" />
                     </Pressable>
                 )}
