@@ -1,8 +1,10 @@
 import axios from 'axios';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
+import { Toast } from 'toastify-react-native';
 import store from '../redux/store.js';
 import { setAuth, clearAuth } from '../redux/authSlice.js';
+import { createSessionExpiredError } from '../utils/apiError.js';
 
 const baseUrl = process.env.EXPO_PUBLIC_BASE_URL;
 
@@ -59,16 +61,71 @@ axiosInstance.interceptors.request.use(
     }
 );
 
-let isRefreshing = false;
-let refreshSubscribers = [];
-
-const onRefreshed = (token) => {
-    refreshSubscribers.forEach((callback) => callback(token));
-    refreshSubscribers = [];
+// Several requests can fail together when the session ends; announce it only once
+let sessionExpiredNotifiedAt = 0;
+const notifySessionExpired = () => {
+    if (Date.now() - sessionExpiredNotifiedAt < 5000) return;
+    sessionExpiredNotifiedAt = Date.now();
+    Toast.error('Your session has expired. Please log in again.');
 };
 
-const addRefreshSubscriber = (callback) => {
-    refreshSubscribers.push(callback);
+// One shared refresh: every request that gets a 401 while it runs awaits the same
+// promise. The server rotates refresh tokens, so a second parallel refresh would
+// send an already-used token, get "Invalid refresh token!" and log the user out.
+let refreshPromise = null;
+
+const refreshSession = () => {
+    if (refreshPromise) return refreshPromise;
+
+    refreshPromise = (async () => {
+        console.log('Refreshing token...');
+        const refreshToken = await getRefreshToken();
+        if (!refreshToken) {
+            throw new Error('No refresh token available');
+        }
+
+        // Plain axios skips the request interceptor, so send the native client
+        // header explicitly; without it the server looks for a web cookie,
+        // returns 401 "Refresh token not found!" and the user gets logged out
+        const response = await axios.post(
+            `${baseUrl}/api/user/refresh-token`,
+            { refreshToken },
+            { headers: { 'x-client-type': 'native' }, timeout: 20000 }
+        );
+        const { newAccessToken, newRefreshToken, user } = response.data || {};
+        if (!newAccessToken || !newRefreshToken) {
+            throw new Error('Invalid refresh response');
+        }
+        // Store the rotated refresh token before releasing waiting requests
+        await setRefreshToken(newRefreshToken);
+        setNewAuth(newAccessToken, user);
+        console.log('Axios Instance Refresh Token Done!');
+        return newAccessToken;
+    })()
+        .catch((err) => {
+            console.log('Error in refreshing token: ', err?.response?.data || err?.message);
+            // Only end the session when there is no token or the server rejected it;
+            // keep it on network errors/timeouts so the next request can retry
+            const refreshStatus = err?.response?.status;
+            const sessionEnded = err?.message === 'No refresh token available'
+                || refreshStatus === 401 || refreshStatus === 403;
+
+            if (sessionEnded) {
+                clearAuthState();
+                notifySessionExpired();
+                // Screens skip this error (see showApiError), so the user sees one toast
+                throw createSessionExpiredError();
+            }
+            if (!err?.response) {
+                throw new Error('Network error. Please check your internet connection.');
+            }
+            throw new Error('Could not refresh your session. Please try again.');
+        })
+        .finally(() => {
+            refreshPromise = null;
+        });
+
+    return refreshPromise;
 };
 
 axiosInstance.interceptors.response.use(
@@ -81,45 +138,28 @@ axiosInstance.interceptors.response.use(
         }
         const { config, response: { status } } = error;
         const originalRequest = config;
-        if (status === 401 && !originalRequest._retry && !originalRequest.skipAuthRefresh) {
+        // Only refresh for requests made with a session; a guest's 401 is a normal error
+        const hadSession = !!originalRequest.headers?.Authorization;
+        if (status === 401 && hadSession && !originalRequest._retry && !originalRequest.skipAuthRefresh) {
             originalRequest._retry = true;
 
-            if (!isRefreshing) {
-                isRefreshing = true;
-                try {
-                    console.log('Refreshing token...');
-                    const refreshToken = await getRefreshToken();
-                    if (!refreshToken) {
-                        throw new Error('No refresh token available');
-                    }
+            const sentToken = String(originalRequest.headers.Authorization).replace('Bearer ', '');
+            const currentToken = getAccessToken();
 
-                    const response = await axios.post(`${baseUrl}/api/user/refresh-token`, { refreshToken });
-                    const { newAccessToken, newRefreshToken, user } = response.data;
-                    setNewAuth(newAccessToken, user);
-                    await setRefreshToken(newRefreshToken);
-                    onRefreshed(newAccessToken);
-                    console.log('Axios Instance Refresh Token Done!');
-                    return axiosInstance(originalRequest);
-                } catch (err) {
-                    console.log('Error in refreshing token: ', err);
-                    clearAuthState();
-                    // navigate user to login screen
-                    return Promise.reject(err);
-                }
-                finally {
-                    isRefreshing = false;
-                }
+            // Already logged out by an earlier failed refresh: stay silent, don't refresh again
+            if (!currentToken) {
+                return Promise.reject(createSessionExpiredError());
             }
-            console.log('Refresh token already in progress, falling back to queue');
-            const retryOriginalRequest = new Promise((resolve) => {
-                const callback = (token) => {
-                    originalRequest.headers.Authorization = `Bearer ${token}`;
-                    resolve(axiosInstance(originalRequest));
-                }
-                addRefreshSubscriber(callback);
-            });
 
-            return retryOriginalRequest;
+            // This request was sent with an old token that has since been refreshed
+            // (its 401 arrived after the refresh finished): just retry with the new one
+            if (sentToken !== currentToken) {
+                return axiosInstance(originalRequest);
+            }
+
+            // The request interceptor attaches the new access token on retry
+            await refreshSession();
+            return axiosInstance(originalRequest);
         }
 
         return Promise.reject(error);
