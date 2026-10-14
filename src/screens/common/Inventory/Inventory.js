@@ -6,7 +6,6 @@ import {
     TouchableOpacity,
     FlatList,
     ActivityIndicator,
-    ScrollView,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { useRoute } from "@react-navigation/native";
@@ -19,8 +18,9 @@ import styles from "./InventoryStyles";
 import { showLoader, hideLoader } from "../../../redux/loaderSlice";
 import truckService from "../../../services/truckService";
 import { formatPhoneNumber } from "../../../utils/extra";
+import useHideLoaderAfterRender from "../../../hooks/useHideLoaderAfterRender";
 
-import InventoryTruckCard from "./components/InventoryTruckCard";
+import TruckCard from "../../../components/TruckCard/TruckCard";
 import InventoryFallback from "./components/InventoryFallback";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL || "";
@@ -52,6 +52,7 @@ const Inventory = () => {
     const userId = route.params?.userId;
 
     const dispatch = useDispatch();
+    const hideLoaderAfterRender = useHideLoaderAfterRender();
 
     const [sellerInfo, setSellerInfo] = useState(null);
     const [trucks, setTrucks] = useState([]);
@@ -83,9 +84,10 @@ const Inventory = () => {
 
             setTrucks(trucks);
             setTotalPages(totalPages);
+            // Keep the loader up until the new cards are laid out and painted
+            hideLoaderAfterRender();
         } catch (error) {
             showToast("error", "Unable to fetch Inventory try again!");
-        } finally {
             dispatch(hideLoader());
         }
     };
@@ -119,7 +121,9 @@ const Inventory = () => {
     }
 
     return (
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}>
+        // Plain View: Layout already provides the ScrollView, and a nested
+        // vertical ScrollView competes with it for touches
+        <View style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.topSection}>
                     <Image
@@ -166,13 +170,19 @@ const Inventory = () => {
                 keyboardShouldPersistTaps="handled"
                 data={trucks}
                 scrollEnabled={false}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item, index) => item?._id || index.toString()}
                 numColumns={2}
                 columnWrapperStyle={styles.row}
                 renderItem={({ item }) => (
-                    <InventoryTruckCard
+                    <TruckCard
+                        images={item?.images}
+                        title={item?.vehicleName}
+                        price={item?.vehiclePrice}
+                        country={item?.country}
+                        state={item?.state}
+                        miles={item?.mileage}
+                        featured={item?.Featured === true}
                         data={item}
-                        handleDeleteClick={() => { }}
                     />
                 )}
             />
@@ -205,7 +215,7 @@ const Inventory = () => {
                     <Text>Next</Text>
                 </TouchableOpacity>
             </View>
-        </ScrollView>
+        </View>
     );
 };
 
