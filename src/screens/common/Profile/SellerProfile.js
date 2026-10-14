@@ -106,22 +106,22 @@ export default function SellerProfile() {
         setFormData((prev) => ({ ...prev, [name]: value }));
 
     const pickImage = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            Toast.error('Permission to access photos is required');
-            return;
-        }
+        // No permission request and no crop step: the system photo picker needs no
+        // permission, and allowsEditing forces the slow legacy picker on iOS. The
+        // avatar crops the photo to its frame with "cover".
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
+            mediaTypes: ['images'],
             quality: 0.8,
         });
-        if (result.canceled) return;
+        if (result.canceled || !result.assets?.length) return;
         const asset = result.assets[0];
         const ext = asset.uri.split('.').pop();
         setPreviewUrl(asset.uri);
-        setImageFile({ uri: asset.uri, type: `image/${ext === 'jpg' ? 'jpeg' : ext}`, name: `profile.${ext}` });
+        setImageFile({
+            uri: asset.uri,
+            type: asset.mimeType || `image/${ext === 'jpg' ? 'jpeg' : ext}`,
+            name: `profile.${ext}`,
+        });
     };
 
     const handleAutoRenewToggle = async () => {

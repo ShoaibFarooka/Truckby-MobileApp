@@ -30,7 +30,7 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Truckby needs access to your photos so you can upload truck listing and profile images.",
+          "photosPermission": false,
           "cameraPermission": false,
           "microphonePermission": false
         }

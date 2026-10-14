@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator, Image, Alert, Linking } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator, Image } from "react-native";
 import { Dropdown } from 'react-native-element-dropdown';
 import * as ImagePicker from 'expo-image-picker';
 import { styles } from "./FormStyles";
@@ -66,32 +66,12 @@ const Form = () => {
     ];
 
     const handleImageUpload = async () => {
-        // Ask for permission
-        const { status, canAskAgain } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted' && canAskAgain) {
-            Toast.error('Permission to access photos is required');
-            return;
-        } else if (status !== 'granted' && !canAskAgain) {
-            Alert.alert(
-                'Permission Required',
-                'Media library access has been denied. Please enable it in settings to proceed.',
-                [
-                    { text: 'Cancel', style: 'cancel' },
-                    {
-                        text: 'Open Settings',
-                        onPress: () => Linking.openSettings(),
-                    },
-                ]
-            );
-            return;
-        }
-
-        // Open image picker
+        // No permission request and no crop step: the system photo picker needs no
+        // permission, and allowsEditing forces the slow legacy picker on iOS. The
+        // preview crops the photo to its frame with "cover".
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
-            quality: 1,
-            allowsEditing: true,
-            aspect: [1, 1], // makes it square
+            quality: 0.8,
         });
 
         // assets is null when the user cancels, so check before reading it

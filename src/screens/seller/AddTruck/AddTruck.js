@@ -174,15 +174,10 @@ const AddTruck = () => {
     const maxImages = 20;
 
     const pickImages = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-            Toast.error("Permission to access photos is required");
-            return;
-        }
-
+        // The system photo picker needs no permission; requesting full library
+        // access first only delayed opening it
         const result = await ImagePicker.launchImageLibraryAsync({
-            // eslint-disable-next-line deprecation/deprecation
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'],
             allowsMultipleSelection: true,
             quality: 0.8,
             selectionLimit: maxImages - previewImages.length,
