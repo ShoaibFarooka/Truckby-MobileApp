@@ -24,23 +24,58 @@ export const styles = StyleSheet.create({
     },
     menuContainer: {
         backgroundColor: '#fff',
-        padding: 16,
-        gap: 8
+        paddingTop: 12,
+        paddingBottom: 4,
+        gap: 2
     },
+    accountCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+        padding: 12,
+        marginBottom: 8,
+        borderRadius: 10,
+        backgroundColor: '#f6f6f6',
+    },
+    accountInfo: {
+        flex: 1,
+    },
+    accountName: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#111',
+    },
+    accountEmail: {
+        fontSize: 13,
+        color: '#6b7280',
+        marginTop: 2,
+    },
+    // 48px tall, full-width rows: comfortable thumb targets
     menuItem: {
-        paddingVertical: 8,
-        alignSelf: "flex-start",
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 14,
+        minHeight: 48,
+        paddingHorizontal: 12,
+        borderRadius: 8,
     },
-    menuItemBorderBottom: {
-        borderBottomWidth: 1,
-        borderBottomColor: "#df0805"
+    menuItemActive: {
+        backgroundColor: '#fdecec',
+    },
+    menuItemPressed: {
+        backgroundColor: '#f0f0f0',
     },
     menuText: {
         fontSize: 16,
         color: '#333',
     },
-    activeText: {
-        color: "#df0805"
+    menuTextActive: {
+        fontWeight: '600',
+    },
+    divider: {
+        height: 1,
+        backgroundColor: '#ececec',
+        marginVertical: 6,
     },
     authButton: {
         paddingVertical: 12,
@@ -65,53 +100,11 @@ export const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: '500',
     },
-    profileSection: {
-        marginTop: 16,
-        width: 200
-    },
-    profileContainer: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-        borderRadius: 10,
-        borderWidth: 1,
-        borderColor: "#0000004d",
-        paddingRight: 16,
-        paddingLeft: 12
-    },
     profileImage: {
-        width: 40,
-        height: 40,
-        borderRadius: 20,
+        width: 44,
+        height: 44,
+        borderRadius: 22,
         borderWidth: 1,
         borderColor: "#8d8d8d1f"
-    },
-    profileName: {
-        marginLeft: 8,
-        marginRight: 16,
-        fontWeight: '500',
-    },
-    profileIconConatiner: {
-        marginLeft: "auto"
-    },
-    dropdown: {
-        backgroundColor: '#fff',
-        padding: 10,
-        borderRadius: 10,
-        alignItems: "flex-start",
-        width: "100%",
-        borderColor: "#ebe6e7",
-        borderWidth: 1,
-        elevation: 8,
-        position: "absolute",
-        top: "100%",
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 10 },
-        shadowOpacity: 0.1,
-        shadowRadius: 10,
-    },
-    dropdownItem: {
-        paddingVertical: 8,
-        fontSize: 14,
     },
 });
