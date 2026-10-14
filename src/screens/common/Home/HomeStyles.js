@@ -129,28 +129,30 @@ export const styles = StyleSheet.create({
     categoryWrapper: {
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "center",
+        justifyContent: "space-between",
     },
 
+    // Percentage width keeps two cards per row on every phone width
     categoryCard: {
-        width: 170,
+        width: "48%",
         height: 210,
         justifyContent: "center",
         alignItems: "center",
-        margin: 8,
+        marginBottom: 16,
     },
 
     categoryImage: {
-        width: 130,
+        width: "100%",
+        maxWidth: 130,
         height: 90,
     },
 
     categoryText: {
-        fontSize: 18,
+        fontSize: width < 380 ? 16 : 18,
         fontWeight: "600",
         textAlign: "center",
         marginTop: 30,
-        paddingHorizontal: 8,
+        paddingHorizontal: 4,
     },
 
     featuredSection: {
