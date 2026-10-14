@@ -244,6 +244,7 @@ const Home = () => {
 
     return (
         <ScrollView
+            keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContainer}
         >

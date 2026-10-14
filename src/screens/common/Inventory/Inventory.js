@@ -119,7 +119,7 @@ const Inventory = () => {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}>
             <View style={styles.card}>
                 <View style={styles.topSection}>
                     <Image
@@ -163,6 +163,7 @@ const Inventory = () => {
             </View>
 
             <FlatList
+                keyboardShouldPersistTaps="handled"
                 data={trucks}
                 scrollEnabled={false}
                 keyExtractor={(item, index) => index.toString()}

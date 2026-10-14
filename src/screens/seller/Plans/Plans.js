@@ -135,7 +135,7 @@ const Plans = () => {
 
     return (
         <View style={styles.screen}>
-            <ScrollView contentContainerStyle={styles.container}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}>
                 <View style={styles.card}>
                     <View style={styles.headingRow}>
                         <Text style={styles.headingText}>Select a plan according to your needs</Text>

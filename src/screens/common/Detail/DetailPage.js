@@ -92,7 +92,7 @@ const DetailPage = ({ route }) => {
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView keyboardShouldPersistTaps="handled" style={styles.container} showsVerticalScrollIndicator={false}>
             <ImageCarousel images={data?.images || []} />
             <Info data={data} />
             <DetailInfo data={sampleData} />

@@ -44,6 +44,7 @@ const TruckCard = ({ images = [], title, price, location, miles, data }) => {
             {/* ── Image Carousel ── */}
             <View style={styles.imageWrapper}>
                 <ScrollView
+                    keyboardShouldPersistTaps="handled"
                     ref={scrollRef}
                     horizontal
                     pagingEnabled

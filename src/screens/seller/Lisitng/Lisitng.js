@@ -132,7 +132,7 @@ const Listing = () => {
 
     return (
         <View style={styles.screen}>
-            <ScrollView contentContainerStyle={styles.container}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}>
                 <View style={styles.headerRow}>
                     <Text style={styles.headerTitle}>My Listings</Text>
                     <TouchableOpacity style={styles.addButton} onPress={handleAddEquipment}>

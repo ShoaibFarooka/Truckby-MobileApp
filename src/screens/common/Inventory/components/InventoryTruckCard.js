@@ -61,6 +61,7 @@ export default function InventoryTruckCard({ data }) {
             {/* Images */}
             <View style={styles.imageWrapper}>
                 <ScrollView
+                    keyboardShouldPersistTaps="handled"
                     ref={scrollRef}
                     horizontal
                     pagingEnabled

@@ -36,6 +36,7 @@ const ImageCarousel = ({ images = [] }) => {
     return (
         <View style={styles.wrapper}>
             <ScrollView
+                keyboardShouldPersistTaps="handled"
                 ref={scrollRef}
                 horizontal
                 pagingEnabled

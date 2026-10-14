@@ -227,7 +227,7 @@ const FilterPage = () => {
     return (
         <View style={styles.container}>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <ScrollView keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
 
                 {/* Top Search Section */}
                 <View style={styles.searchSection}>
@@ -330,6 +330,7 @@ const FilterPage = () => {
 
                 <View style={styles.cardsContainer}>
                     <FlatList
+                        keyboardShouldPersistTaps="handled"
                         data={listData}
                         keyExtractor={(item) => item._id}
                         scrollEnabled={false}

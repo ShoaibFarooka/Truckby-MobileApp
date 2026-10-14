@@ -7,7 +7,7 @@ const Layout = ({ children, showHeader, showFooter }) => {
     return (
         <SafeAreaView edges={Platform.OS == "ios" ? ['top'] : ['top', 'bottom']} style={styles.layout}>
             {showHeader && <Header />}
-            <ScrollView contentContainerStyle={styles.scrollContent}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.scrollContent}>
                 <View style={styles.layoutContent}>
                     {children}
                 </View>
