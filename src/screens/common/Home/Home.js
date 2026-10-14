@@ -11,6 +11,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { styles } from "./HomeStyles";
 import PromoVideo from './components/PromoVideo/PromoVideo';
 import TruckCard from '../../../components/TruckCard/TruckCard';
+import EmptyState from '../../../components/EmptyState/EmptyState';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDispatch } from 'react-redux';
@@ -44,6 +45,8 @@ const Home = () => {
     const [truckSubCategory, setTruckSubCategory] = useState('');
 
     const [page, setPage] = useState(1);
+    // 'loading' | 'ready' | 'error'; the empty message only shows once loading is done
+    const [featuredStatus, setFeaturedStatus] = useState('loading');
 
     const [pagination, setPagination] = useState({
         totalPages: 0,
@@ -100,17 +103,19 @@ const Home = () => {
                 listingType,
                 truckCategory
             });
-            setListData(response.trucks);
+            setListData(response?.trucks || []);
             setPagination({
                 totalPages: response.totalPages || 0,
                 totalCount: response.totalCount || 0,
                 currentPage: pageIndex
             });
             setPage(pageIndex);
+            setFeaturedStatus('ready');
             // Keep the loader up until the new cards are laid out and painted
             hideLoaderAfterRender();
         } catch (error) {
             console.log('ERROR:', error.message);
+            setFeaturedStatus('error');
             dispatch(hideLoader());
         }
     };
@@ -443,6 +448,26 @@ const Home = () => {
                         ))}
 
                     </View>
+
+                    {featuredStatus === 'ready' && listData.length === 0 && (
+                        <EmptyState
+                            icon="star-outline"
+                            title="No featured listings right now"
+                            message="Check back soon, or browse all available equipment."
+                            actionLabel="Browse All Equipment"
+                            onAction={() => navigation.navigate('Filter')}
+                        />
+                    )}
+
+                    {featuredStatus === 'error' && (
+                        <EmptyState
+                            icon="cloud-offline-outline"
+                            title="Couldn't load featured listings"
+                            message="Please check your connection and try again."
+                            actionLabel="Try Again"
+                            onAction={() => fetchAllTrucks(page)}
+                        />
+                    )}
 
                     {renderPagination()}
 

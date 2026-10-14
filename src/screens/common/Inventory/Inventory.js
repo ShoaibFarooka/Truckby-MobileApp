@@ -22,6 +22,7 @@ import { formatPhoneNumber } from "../../../utils/extra";
 import useHideLoaderAfterRender from "../../../hooks/useHideLoaderAfterRender";
 
 import TruckCard from "../../../components/TruckCard/TruckCard";
+import EmptyState from "../../../components/EmptyState/EmptyState";
 import InventoryFallback from "./components/InventoryFallback";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL || "";
@@ -38,6 +39,8 @@ const Inventory = () => {
     const [trucks, setTrucks] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    // 'loading' | 'ready' | 'error'; the empty message only shows once loading is done
+    const [listStatus, setListStatus] = useState('loading');
 
     const isValidUserId = /^[0-9a-fA-F]{24}$/.test(userId);
 
@@ -62,26 +65,28 @@ const Inventory = () => {
                 image: user.image,
             });
 
-            setTrucks(trucks);
-            setTotalPages(totalPages);
+            setTrucks(trucks || []);
+            setTotalPages(totalPages || 1);
+            setListStatus('ready');
             // Keep the loader up until the new cards are laid out and painted
             hideLoaderAfterRender();
         } catch (error) {
             showApiError(error, "Unable to fetch Inventory try again!");
+            setListStatus('error');
             dispatch(hideLoader());
         }
     };
 
     useEffect(() => {
         if (userId && isValidUserId) {
-            fetchInventory();
+            fetchInventory(page);
         }
     }, [userId, page]);
 
+    // The effect above fetches when page changes, so don't fetch here too
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
             setPage(newPage);
-            fetchInventory(newPage);
         }
     };
 
@@ -167,6 +172,25 @@ const Inventory = () => {
                 )}
             />
 
+            {listStatus === 'ready' && trucks.length === 0 && (
+                <EmptyState
+                    icon="cube-outline"
+                    title="No equipment listed yet"
+                    message="This seller doesn't have any listings right now. Check back later."
+                />
+            )}
+
+            {listStatus === 'error' && (
+                <EmptyState
+                    icon="cloud-offline-outline"
+                    title="Couldn't load this inventory"
+                    message="Please check your connection and try again."
+                    actionLabel="Try Again"
+                    onAction={() => fetchInventory(page)}
+                />
+            )}
+
+            {trucks.length > 0 && (
             <View style={styles.pagination}>
                 <TouchableOpacity
                     disabled={page === 1}
@@ -195,6 +219,7 @@ const Inventory = () => {
                     <Text>Next</Text>
                 </TouchableOpacity>
             </View>
+            )}
         </View>
     );
 };
