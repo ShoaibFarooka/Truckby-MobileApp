@@ -13,7 +13,7 @@ import * as ImagePicker from 'expo-image-picker';
 import Toast from 'react-native-toast-message';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserInfo } from '../../../redux/userSlice';
-import { HideLoading, ShowLoading } from '../../../redux/loaderSlice';
+import { hideLoader, showLoader } from '../../../redux/loaderSlice';
 import userService from '../../../services/userService';
 import { uploadImg } from '../../../services/image';
 import { styles } from './ProfileStyles';
@@ -59,7 +59,7 @@ export default function UserProfile() {
         };
 
         if (imageFile) {
-            dispatch(ShowLoading());
+            dispatch(showLoader());
             try {
                 const form = new FormData();
                 form.append('images', imageFile);
@@ -74,12 +74,12 @@ export default function UserProfile() {
                 Toast.show({ type: 'error', text1: 'Error uploading image' });
                 return;
             } finally {
-                dispatch(HideLoading());
+                dispatch(hideLoader());
             }
         }
 
         try {
-            dispatch(ShowLoading());
+            dispatch(showLoader());
             const response = await userService.updateUserInfo(updatedData);
             if (!response) {
                 Toast.show({ type: 'error', text1: 'Update failed' });
@@ -90,7 +90,7 @@ export default function UserProfile() {
         } catch (error) {
             Toast.show({ type: 'error', text1: error?.response?.data?.error || 'Update failed' });
         } finally {
-            dispatch(HideLoading());
+            dispatch(hideLoader());
         }
     };
 

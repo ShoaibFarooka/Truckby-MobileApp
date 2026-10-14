@@ -164,6 +164,9 @@ export const styles = StyleSheet.create({
         fontWeight: '500',
     },
     sendButton: {
+        minWidth: 70,
+        alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: '#DF0805',
         paddingVertical: 10,
         paddingHorizontal: 18,
@@ -172,5 +175,13 @@ export const styles = StyleSheet.create({
     sendText: {
         color: '#fff',
         fontWeight: '500',
+    },
+    buttonDisabled: {
+        opacity: 0.6,
+    },
+    errorText: {
+        color: '#DF0805',
+        fontSize: 13,
+        marginBottom: 10,
     },
 });

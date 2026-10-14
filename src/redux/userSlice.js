@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { ShowLoading, HideLoading } from './loaderSlice';
+import { showLoader, hideLoader } from './loaderSlice';
 import userService from '../services/userService';
 
 const initialState = {
@@ -12,14 +12,14 @@ const initialState = {
 export const fetchUserInfo = createAsyncThunk(
     'user/fetchUserInfo',
     async (_, { dispatch }) => {
-        dispatch(ShowLoading());
+        dispatch(showLoader());
         try {
             const response = await userService.getUserInfo();
             return response.user;
         } catch (error) {
             throw error;
         } finally {
-            dispatch(HideLoading());
+            dispatch(hideLoader());
         }
     }
 );

@@ -8,6 +8,8 @@ const baseUrl = process.env.EXPO_PUBLIC_BASE_URL;
 
 const axiosInstance = axios.create({
     baseURL: baseUrl,
+    // Fail hung requests so the global loader (hidden in each caller's finally) can't stay up forever
+    timeout: 20000,
     headers: {
         'Content-Type': 'application/json',
     },

@@ -2,7 +2,9 @@ import { StyleSheet } from 'react-native';
 
 export const styles = StyleSheet.create({
     overlay: {
-        flex: 1,
+        ...StyleSheet.absoluteFill,
+        zIndex: 1000,
+        elevation: 1000,
         backgroundColor: 'rgba(255,255,255,0.85)',
         justifyContent: 'center',
         alignItems: 'center',
