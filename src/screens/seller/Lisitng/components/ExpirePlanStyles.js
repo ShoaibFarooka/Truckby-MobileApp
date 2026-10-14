@@ -19,21 +19,4 @@ export const styles = StyleSheet.create({
         color: "#111827",
         textAlign: "center",
     },
-    subtitle: {
-        fontSize: 18,
-        fontWeight: "500",
-        color: "#111827",
-    },
-    button: {
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        marginTop: 24,
-        backgroundColor: "#DF0805",
-        borderRadius: 8,
-    },
-    buttonText: {
-        color: "#ffffff",
-        fontWeight: "500",
-        fontSize: 14,
-    },
 });

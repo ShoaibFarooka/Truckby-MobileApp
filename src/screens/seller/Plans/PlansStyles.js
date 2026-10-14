@@ -34,16 +34,7 @@ export const styles = StyleSheet.create({
         fontWeight: "bold",
         color: "#111827",
     },
-    headingSubText: {
-        fontSize: 13,
-        color: "#6b7280",
-        fontWeight: "400",
-    },
 
-    /* Stacked plan cards */
-    planList: {
-        gap: 16,
-    },
     planCard: {
         borderWidth: 1,
         borderColor: "#E6E9F5",
@@ -82,39 +73,6 @@ export const styles = StyleSheet.create({
         color: "#ffffff",
         fontSize: 11,
         fontWeight: "600",
-    },
-    priceRow: {
-        flexDirection: "row",
-        alignItems: "flex-end",
-        flexWrap: "wrap",
-    },
-    priceText: {
-        fontSize: 24,
-        fontWeight: "bold",
-        color: "#111827",
-    },
-    priceSuffix: {
-        fontSize: 14,
-        color: "#6b7280",
-        marginLeft: 2,
-    },
-    planButton: {
-        marginTop: 16,
-        paddingVertical: 12,
-        paddingHorizontal: 8,
-        borderRadius: 8,
-        backgroundColor: "#DF0805",
-        width: "100%",
-        alignItems: "center",
-    },
-    planButtonDisabled: {
-        backgroundColor: "#9ca3af",
-    },
-    planButtonText: {
-        color: "#ffffff",
-        fontSize: 13,
-        fontWeight: "600",
-        textAlign: "center",
     },
 
     /* Listings included */
@@ -160,8 +118,11 @@ export const styles = StyleSheet.create({
         paddingVertical: 40,
         alignItems: "center",
     },
-    emptyStateText: {
-        color: "#6b7280",
-        fontSize: 14,
+    emptyStateTitle: {
+        marginTop: 12,
+        color: "#111827",
+        fontSize: 16,
+        fontWeight: "600",
+        textAlign: "center",
     },
 });

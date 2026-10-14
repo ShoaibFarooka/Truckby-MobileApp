@@ -27,7 +27,7 @@ const Footer = () => {
         { name: 'Home', screen: 'Home', protected: false },
         { name: 'Listing', screen: 'Listing', protected: true },
         { name: 'Inventory', screen: 'Inventory', protected: true },
-        { name: 'Plans', screen: 'Plans', protected: true },
+        { name: 'My Plan', screen: 'Plans', protected: true },
         { name: 'Privacy', screen: 'Privacy', protected: false },
         { name: 'Contact Us', screen: 'ContactUs', protected: false },
     ];

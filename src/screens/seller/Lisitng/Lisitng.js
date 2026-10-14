@@ -126,7 +126,7 @@ const Listing = () => {
         if (info.status) {
             if (!isLimitExceeded()) navigation.navigate("AddTruck");
         } else {
-            navigation.navigate("Plans");
+            showToast("info", "You need an active plan to add listings.");
         }
     };
 
