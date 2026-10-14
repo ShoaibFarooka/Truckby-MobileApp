@@ -140,7 +140,10 @@ export const styles = StyleSheet.create({
 
     cardsContainer: {
         paddingHorizontal: 16,
-        alignItems: "center",
+    },
+
+    cardsRow: {
+        justifyContent: "space-between",
     },
 
     paginationWrapper: {

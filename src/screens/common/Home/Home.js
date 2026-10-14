@@ -11,7 +11,7 @@ import {
 import { Dropdown } from 'react-native-element-dropdown';
 import { styles } from "./HomeStyles";
 import PromoVideo from './components/PromoVideo/PromoVideo';
-import TruckCard from './components/TruckCard/TruckCard';
+import TruckCard from '../../../components/TruckCard/TruckCard';
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useDispatch } from 'react-redux';
@@ -92,7 +92,7 @@ const Home = () => {
         try {
             const response = await truckService.getAllTrucksWithFilter({
                 pageIndex,
-                limit: 5,
+                limit: 6,
                 Featured: true,
                 searchText,
                 country: searchCountry,
@@ -430,12 +430,14 @@ const Home = () => {
 
                         {listData?.map((truck, index) => (
                             <TruckCard
-                                key={index}
+                                key={truck?._id || index}
                                 images={truck?.images}
                                 title={truck?.vehicleName}
                                 price={truck?.vehiclePrice}
-                                location={truck?.country}
+                                country={truck?.country}
+                                state={truck?.state}
                                 miles={truck?.mileage}
+                                featured
                                 data={truck}
                             />
                         ))}

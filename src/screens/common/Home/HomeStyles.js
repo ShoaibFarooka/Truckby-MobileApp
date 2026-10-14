@@ -164,7 +164,7 @@ export const styles = StyleSheet.create({
     truckContainer: {
         flexDirection: "row",
         flexWrap: "wrap",
-        justifyContent: "center",
+        justifyContent: "space-between",
     },
 
     paginationWrapper: {

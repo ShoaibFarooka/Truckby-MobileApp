@@ -16,7 +16,7 @@ import { Dropdown } from "react-native-element-dropdown";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { styles } from "./FilterPageStyles";
 import FilterComponent from "./components/FilterComponent/FilterComponent";
-import TruckCard from "./components/TruckCard/TruckCard";
+import TruckCard from "../../../components/TruckCard/TruckCard";
 import { countries } from "../../../data/countries";
 import { truckSubCategories } from "../../../data/Content";
 import truckService from "../../../services/truckService";
@@ -113,7 +113,7 @@ const FilterPage = () => {
         try {
             const combinedFilters = {
                 pageIndex,
-                limit: 5,
+                limit: 6,
                 searchText: debouncedSearchText,
                 listingType: filters.listingType,
                 truckCategory: filters.truckCategory,
@@ -334,17 +334,20 @@ const FilterPage = () => {
                         data={listData}
                         keyExtractor={(item) => item._id}
                         scrollEnabled={false}
+                        numColumns={2}
+                        columnWrapperStyle={styles.cardsRow}
                         renderItem={({ item }) => (
                             <TruckCard
                                 images={item.images}
                                 title={item.vehicleName}
                                 price={item.vehiclePrice}
-                                location={item.country}
+                                country={item.country}
+                                state={item.state}
                                 miles={item.mileage}
+                                featured={item.Featured === true}
                                 data={item}
                             />
                         )}
-                        ItemSeparatorComponent={() => <View style={{ height: 14 }} />}
                     />
                 </View>
 
