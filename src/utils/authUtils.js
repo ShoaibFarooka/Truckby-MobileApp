@@ -3,7 +3,6 @@ const verifyAuthentication = (token) => {
 };
 
 const verifyAuthorization = (userRole, allowedRoles = []) => {
-    console.log('Verifying Authorization...', userRole);
     if (!userRole || allowedRoles.length === 0) {
         return false;
     }
