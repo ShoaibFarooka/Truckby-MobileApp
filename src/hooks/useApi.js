@@ -14,7 +14,10 @@ function useApi(apiFunction) {
             return result;
         } catch (err) {
             console.log("UseAPI Error: ", err?.response?.data || err);
-            const errMsg = err?.response?.data?.error || err?.response?.data || err.message || "Unknown error";
+            const data = err?.response?.data;
+            const candidate = data?.error || data?.message || data || err?.message;
+            // Always a string, since callers pass it straight to Toast.error
+            const errMsg = typeof candidate === "string" && candidate ? candidate : "Something went wrong";
             setError(errMsg);
             throw errMsg;
         } finally {

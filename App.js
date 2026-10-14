@@ -21,7 +21,13 @@ export default function App() {
           <Loader />
 
           <StatusBar style="auto" />
-          <ToastManager showCloseIcon={false} showProgressBar={false} topOffset={60}
+          {/* useModal={false}: the default Modal mode blocks every tap and scroll
+              on the screen until the toast disappears */}
+          <ToastManager
+            useModal={false}
+            showCloseIcon={false}
+            showProgressBar={false}
+            topOffset={60}
           />
         </SafeAreaProvider>
       </Provider>

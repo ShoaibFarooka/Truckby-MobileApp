@@ -68,7 +68,7 @@ const Form = () => {
         // Ask for permission
         const { status, canAskAgain } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted' && canAskAgain) {
-            Alert.alert('Permission to access media library is required!');
+            Toast.error('Permission to access photos is required');
             return;
         } else if (status !== 'granted' && !canAskAgain) {
             Alert.alert(

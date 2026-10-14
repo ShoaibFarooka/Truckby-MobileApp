@@ -11,27 +11,6 @@ import subscriptionService from "../../../services/subscriptionService";
 import { hideLoader, showLoader } from "../../../redux/loaderSlice";
 import { styles } from "./LisitngStyles.js";
 
-const showToast = (type, message) => {
-    switch (type) {
-        case "success":
-            Toast.success(message);
-            break;
-        case "error":
-            Toast.error(message);
-            break;
-        case "info":
-            Toast.info(message);
-            break;
-        case "warn":
-        case "warning":
-            Toast.warn(message);
-            break;
-        default:
-            Toast.show?.(message);
-    }
-};
-
-
 const Listing = () => {
     const dispatch = useDispatch();
     const navigation = useNavigation();
@@ -80,11 +59,11 @@ const Listing = () => {
         try {
             await truckService.deleteTruck(deleteTruckId);
             setListData((prev) => prev.filter((list) => list._id !== deleteTruckId));
-            showToast("success", "Equipment deleted successfully");
+            Toast.success("Equipment deleted successfully");
             await fetchAllTrucks(page);
         } catch (error) {
             console.error("Error deleting service:", error);
-            showToast("error", "Failed to delete service");
+            Toast.error("Failed to delete service");
         } finally {
             dispatch(hideLoader());
             setDeleteOpen(false);
@@ -101,7 +80,7 @@ const Listing = () => {
                     setProductData(response.productData);
                 }
             } catch (error) {
-                showToast("error", error?.response?.data?.error || "Something went wrong");
+                Toast.error(error?.response?.data?.error || "Something went wrong");
             } finally {
                 dispatch(hideLoader());
             }
@@ -112,8 +91,7 @@ const Listing = () => {
 
     const isLimitExceeded = () => {
         if (listData.length >= productData?.listings) {
-            showToast(
-                "error",
+            Toast.error(
                 `Your current membership allows only up to ${productData?.listings} listing${productData?.listings > 1 ? "s" : ""
                 }. You can't exceed this limit.`
             );
@@ -126,7 +104,7 @@ const Listing = () => {
         if (info.status) {
             if (!isLimitExceeded()) navigation.navigate("AddTruck");
         } else {
-            showToast("info", "You need an active plan to add listings.");
+            Toast.info("You need an active plan to add listings.");
         }
     };
 

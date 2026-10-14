@@ -26,26 +26,6 @@ import { styles } from "./AddTruckStyles";
 import CustomPicker from "./components/CustomPicker";
 import { countries } from "../../../data/countries";
 
-const showToast = (type, message) => {
-    switch (type) {
-        case "success":
-            Toast.success(message);
-            break;
-        case "error":
-            Toast.error(message);
-            break;
-        case "info":
-            Toast.info(message);
-            break;
-        case "warn":
-        case "warning":
-            Toast.warn(message);
-            break;
-        default:
-            Toast.show?.(message);
-    }
-};
-
 const AddTruck = () => {
     const route = useRoute();
     const navigation = useNavigation();
@@ -155,7 +135,7 @@ const AddTruck = () => {
                             img.isLocal ? uploaded[uploadedIdx++] : img.uri
                         );
                     } else {
-                        showToast("error", "Failed to upload images");
+                        Toast.error("Failed to upload images");
                         setSubmitting(false);
                         dispatch(hideLoader());
                         return;
@@ -171,16 +151,16 @@ const AddTruck = () => {
 
                 if (oldTruckData?._id) {
                     await truckService.updateTruck(oldTruckData._id, truckData);
-                    showToast("success", "Equipment updated successfully!");
+                    Toast.success("Equipment updated successfully!");
                 } else {
                     await truckService.createTruck(truckData);
-                    showToast("success", "Equipment listed successfully!");
+                    Toast.success("Equipment listed successfully!");
                     resetForm();
                     setPreviewImages([]);
                 }
                 navigation.navigate("Listing");
             } catch (error) {
-                showToast("error", error?.response?.data?.error || "Listing failed");
+                Toast.error(error?.response?.data?.error || "Listing failed");
                 console.error("Listing error:", error);
             } finally {
                 dispatch(hideLoader());
@@ -196,7 +176,7 @@ const AddTruck = () => {
     const pickImages = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== "granted") {
-            showToast("error", "Permission to access photos is required");
+            Toast.error("Permission to access photos is required");
             return;
         }
 
@@ -219,11 +199,11 @@ const AddTruck = () => {
             const normalizedType = type.startsWith("image/") ? type : `image/${type}`;
 
             if (!validImageTypes.includes(normalizedType)) {
-                showToast("error", `Unsupported format: ${normalizedType}`);
+                Toast.error(`Unsupported format: ${normalizedType}`);
                 continue;
             }
             if (asset.fileSize && asset.fileSize > maxSize) {
-                showToast("error", `"${asset.fileName || "Image"}" exceeds 6MB`);
+                Toast.error(`"${asset.fileName || "Image"}" exceeds 6MB`);
                 continue;
             }
             accepted.push({ uri: asset.uri, isLocal: true });
@@ -245,7 +225,7 @@ const AddTruck = () => {
     const handleSubmit = async () => {
         const errors = await formik.validateForm();
         if (Object.keys(errors).length > 0) {
-            showToast("error", "Please fill out all required fields");
+            Toast.error("Please fill out all required fields");
             return;
         }
         formik.handleSubmit();

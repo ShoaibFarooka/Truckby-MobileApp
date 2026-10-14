@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import * as ImagePicker from 'expo-image-picker';
-import Toast from 'react-native-toast-message';
+import { Toast } from 'toastify-react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchUserInfo } from '../../../redux/userSlice';
 import { hideLoader, showLoader } from '../../../redux/loaderSlice';
@@ -77,7 +77,7 @@ export default function SellerProfile() {
                 });
                 if (user?.image) setPreviewUrl(user.image);
             } catch (error) {
-                Toast.show({ type: 'error', text1: error?.response?.data?.error || 'Failed to load profile' });
+                Toast.error(error?.response?.data?.error || 'Failed to load profile');
             } finally {
                 dispatch(hideLoader());
                 setLoading(false);
@@ -92,7 +92,7 @@ export default function SellerProfile() {
                     setAutoRenew(response.info.autoRenew ?? false);
                 }
             } catch (error) {
-                Toast.show({ type: 'error', text1: error?.response?.data?.error || 'Failed to load subscription' });
+                Toast.error(error?.response?.data?.error || 'Failed to load subscription');
             }
         };
 
@@ -107,7 +107,7 @@ export default function SellerProfile() {
     const pickImage = async () => {
         const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (status !== 'granted') {
-            Toast.show({ type: 'error', text1: 'Permission to access photos is required' });
+            Toast.error('Permission to access photos is required');
             return;
         }
         const result = await ImagePicker.launchImageLibraryAsync({
@@ -128,9 +128,9 @@ export default function SellerProfile() {
             dispatch(showLoader());
             await subscriptionService.ToggleAutoRenew();
             setAutoRenew((prev) => !prev);
-            Toast.show({ type: 'success', text1: 'Auto Renew status updated' });
+            Toast.success('Auto Renew status updated');
         } catch {
-            Toast.show({ type: 'error', text1: 'Failed to update Auto Renew' });
+            Toast.error('Failed to update Auto Renew');
         } finally {
             dispatch(hideLoader());
         }
@@ -149,11 +149,11 @@ export default function SellerProfile() {
                 if (res?.success && res?.urls?.length > 0) {
                     finalData.image = res.urls[0];
                 } else {
-                    Toast.show({ type: 'error', text1: 'Image upload failed' });
+                    Toast.error('Image upload failed');
                     return;
                 }
             } catch {
-                Toast.show({ type: 'error', text1: 'Error uploading image' });
+                Toast.error('Error uploading image');
                 return;
             } finally {
                 dispatch(hideLoader());
@@ -164,13 +164,13 @@ export default function SellerProfile() {
             dispatch(showLoader());
             const response = await userService.updateUserInfo(finalData);
             if (!response) {
-                Toast.show({ type: 'error', text1: 'Update failed' });
+                Toast.error('Update failed');
                 return;
             }
-            Toast.show({ type: 'success', text1: 'Profile updated successfully' });
+            Toast.success('Profile updated successfully');
             dispatch(fetchUserInfo());
         } catch (error) {
-            Toast.show({ type: 'error', text1: error?.response?.data?.error || 'Update failed' });
+            Toast.error(error?.response?.data?.error || 'Update failed');
         } finally {
             dispatch(hideLoader());
         }

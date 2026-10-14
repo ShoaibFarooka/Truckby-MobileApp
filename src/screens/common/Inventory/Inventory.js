@@ -25,27 +25,6 @@ import InventoryFallback from "./components/InventoryFallback";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL || "";
 
-const showToast = (type, message) => {
-    switch (type) {
-        case "success":
-            Toast.success(message);
-            break;
-        case "error":
-            Toast.error(message);
-            break;
-        case "info":
-            Toast.info(message);
-            break;
-        case "warn":
-        case "warning":
-            Toast.warn(message);
-            break;
-        default:
-            Toast.info(message);
-    }
-};
-
-
 const Inventory = () => {
     const route = useRoute();
 
@@ -87,7 +66,7 @@ const Inventory = () => {
             // Keep the loader up until the new cards are laid out and painted
             hideLoaderAfterRender();
         } catch (error) {
-            showToast("error", "Unable to fetch Inventory try again!");
+            Toast.error("Unable to fetch Inventory try again!");
             dispatch(hideLoader());
         }
     };
@@ -110,9 +89,9 @@ const Inventory = () => {
 
         try {
             await Clipboard.setStringAsync(shareableLink);
-            showToast("success", "Link copied to ClipBoard");
+            Toast.success("Link copied to ClipBoard");
         } catch (error) {
-            showToast("error", "Unable to copy link try again!");
+            Toast.error("Unable to copy link try again!");
         }
     };
 
