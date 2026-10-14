@@ -27,6 +27,9 @@ export const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
+    imageFill: {
+        ...StyleSheet.absoluteFill,
+    },
 
     // ── Badges ──
     featuredBadge: {
