@@ -22,7 +22,6 @@ import { truckSubCategories } from "../../../data/Content";
 import truckService from "../../../services/truckService";
 import { useDispatch } from "react-redux";
 import { showLoader, hideLoader } from "../../../redux/loaderSlice";
-import useHideLoaderAfterRender from "../../../hooks/useHideLoaderAfterRender";
 
 const useDebounce = (value, delay = 500) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -41,7 +40,6 @@ const FilterPage = () => {
     const route = useRoute();
     const insets = useSafeAreaInsets();
     const dispatch = useDispatch();
-    const hideLoaderAfterRender = useHideLoaderAfterRender();
 
     const {
         searchText: initialSearchText = "",
@@ -137,15 +135,13 @@ const FilterPage = () => {
 
             setCurrentPage(pageIndex);
             setResultsStatus('ready');
-            // Keep the loader up until the new cards are laid out and painted
-            hideLoaderAfterRender();
 
         } catch (error) {
             console.log("FETCH TRUCK ERROR:", error?.message);
             setResultsStatus('error');
-            dispatch(hideLoader());
         } finally {
             setLoading(false);
+            dispatch(hideLoader());
         }
     };
 

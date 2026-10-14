@@ -18,7 +18,6 @@ import { useDispatch } from 'react-redux';
 import { hideLoader, showLoader } from '../../../redux/loaderSlice';
 import truckService from '../../../services/truckService';
 import { useNavigation } from '@react-navigation/native';
-import useHideLoaderAfterRender from '../../../hooks/useHideLoaderAfterRender';
 
 import Aggregateandmining from '../../../../assets/images/trucks/Aggregateandmining.png';
 import Constructionequipment from '../../../../assets/images/trucks/Constructionequipment.png';
@@ -57,7 +56,6 @@ const Home = () => {
 
     const dispatch = useDispatch();
     const navigation = useNavigation();
-    const hideLoaderAfterRender = useHideLoaderAfterRender();
 
     const listingTypes = [
         { label: 'For Sale', value: 'For Sale' },
@@ -111,11 +109,10 @@ const Home = () => {
             });
             setPage(pageIndex);
             setFeaturedStatus('ready');
-            // Keep the loader up until the new cards are laid out and painted
-            hideLoaderAfterRender();
         } catch (error) {
             console.log('ERROR:', error.message);
             setFeaturedStatus('error');
+        } finally {
             dispatch(hideLoader());
         }
     };

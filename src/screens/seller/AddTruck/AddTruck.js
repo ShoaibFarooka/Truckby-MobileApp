@@ -137,8 +137,7 @@ const AddTruck = () => {
                         );
                     } else {
                         Toast.error("Failed to upload images");
-                        setSubmitting(false);
-                        dispatch(hideLoader());
+                        // finally hides the loader and resets submitting
                         return;
                     }
                 } else {

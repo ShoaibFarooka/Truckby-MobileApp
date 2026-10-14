@@ -19,7 +19,6 @@ import styles from "./InventoryStyles";
 import { showLoader, hideLoader } from "../../../redux/loaderSlice";
 import truckService from "../../../services/truckService";
 import { formatPhoneNumber } from "../../../utils/extra";
-import useHideLoaderAfterRender from "../../../hooks/useHideLoaderAfterRender";
 
 import TruckCard from "../../../components/TruckCard/TruckCard";
 import EmptyState from "../../../components/EmptyState/EmptyState";
@@ -33,7 +32,6 @@ const Inventory = () => {
     const userId = route.params?.userId;
 
     const dispatch = useDispatch();
-    const hideLoaderAfterRender = useHideLoaderAfterRender();
 
     const [sellerInfo, setSellerInfo] = useState(null);
     const [trucks, setTrucks] = useState([]);
@@ -68,11 +66,10 @@ const Inventory = () => {
             setTrucks(trucks || []);
             setTotalPages(totalPages || 1);
             setListStatus('ready');
-            // Keep the loader up until the new cards are laid out and painted
-            hideLoaderAfterRender();
         } catch (error) {
             showApiError(error, "Unable to fetch Inventory try again!");
             setListStatus('error');
+        } finally {
             dispatch(hideLoader());
         }
     };
