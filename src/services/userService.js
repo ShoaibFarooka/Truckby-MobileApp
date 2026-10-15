@@ -94,22 +94,6 @@ const userService = {
       throw error;
     }
   },
-  updateUserProfile: async (payload, id) => {
-    try {
-      const response = await axiosInstance.patch(
-        `${BASE_URL}/update-user-profile/${id}`,
-        payload,
-        {
-          withCredentials: true,
-          skipAuthRefresh: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  },
   changeUserPassword: async (payload) => {
     try {
       const response = await axiosInstance.patch(
