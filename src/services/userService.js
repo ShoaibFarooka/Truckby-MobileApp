@@ -94,6 +94,18 @@ const userService = {
       throw error;
     }
   },
+  deleteAccount: async (payload) => {
+    try {
+      const response = await axiosInstance.delete(`${BASE_URL}/delete-account`, {
+        data: payload,
+        // The server cancels the Stripe subscription and deletes images first
+        timeout: 60000,
+      });
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
   changeUserPassword: async (payload) => {
     try {
       const response = await axiosInstance.patch(

@@ -174,4 +174,37 @@ export const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: '600',
     },
+
+    /* Delete Account */
+    dangerCard: {
+        marginTop: 24,
+        paddingVertical: 24,
+    },
+    dangerTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#111',
+        marginBottom: 8,
+    },
+    dangerText: {
+        fontSize: 14,
+        color: '#6b7280',
+        lineHeight: 20,
+        marginBottom: 16,
+    },
+    deleteAccountButton: {
+        borderWidth: 1,
+        borderColor: '#DC2626',
+        borderRadius: 10,
+        height: 48,
+        alignItems: 'center',
+        justifyContent: 'center',
+        alignSelf: 'flex-start',
+        paddingHorizontal: 24,
+    },
+    deleteAccountButtonText: {
+        color: '#DC2626',
+        fontSize: 15,
+        fontWeight: '600',
+    },
 });

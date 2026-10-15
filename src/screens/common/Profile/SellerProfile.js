@@ -11,14 +11,18 @@ import {
 import { Image } from 'expo-image';
 import { Dropdown } from 'react-native-element-dropdown';
 import * as ImagePicker from 'expo-image-picker';
+import * as SecureStore from 'expo-secure-store';
+import { useNavigation } from '@react-navigation/native';
 import { Toast } from 'toastify-react-native';
-import { showApiError } from '../../../utils/apiError';
+import { getErrorMessage, isSessionExpiredError, showApiError } from '../../../utils/apiError';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUserInfo } from '../../../redux/userSlice';
+import { clearAuth } from '../../../redux/authSlice';
+import { clearUser, fetchUserInfo } from '../../../redux/userSlice';
 import { hideLoader, showLoader } from '../../../redux/loaderSlice';
 import userService from '../../../services/userService';
 import useImageUpload from '../../../hooks/useImageUpload';
 import subscriptionService from '../../../services/subscriptionService';
+import DeleteAccountModal from './components/DeleteAccountModal';
 import { styles } from './ProfileStyles';
 
 
@@ -37,6 +41,7 @@ function ToggleSwitch({ checked, onChange }) {
 
 export default function SellerProfile() {
     const dispatch = useDispatch();
+    const navigation = useNavigation();
     const authUser = useSelector((state) => state.auth.user);
 
     const [formData, setFormData] = useState({
@@ -58,6 +63,9 @@ export default function SellerProfile() {
     const [loading, setLoading] = useState(true);
     const [info, setInfo] = useState({ status: false, planName: '' });
     const [autoRenew, setAutoRenew] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
 
 
     useEffect(() => {
@@ -173,6 +181,35 @@ export default function SellerProfile() {
     };
 
 
+    const openDeleteModal = () => {
+        setDeleteError('');
+        setDeleteOpen(true);
+    };
+
+    const handleDeleteAccount = async (password) => {
+        setDeleting(true);
+        setDeleteError('');
+        try {
+            await userService.deleteAccount({ password });
+            await SecureStore.deleteItemAsync('refreshToken');
+            setDeleteOpen(false);
+            // Leave the profile before clearing auth, otherwise its ProtectedRoute
+            // sees the logged-out state and sends the user to Login instead of Home
+            navigation.replace('Home');
+            dispatch(clearAuth());
+            dispatch(clearUser());
+            Toast.success('Your account has been deleted');
+        } catch (error) {
+            // The interceptor already logged the user out and announced it
+            if (isSessionExpiredError(error)) {
+                setDeleteOpen(false);
+                return;
+            }
+            setDeleteError(getErrorMessage(error, 'Unable to delete your account. Please try again.'));
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     if (loading) return null;
 
@@ -315,7 +352,26 @@ export default function SellerProfile() {
                         <Text style={styles.saveButtonText}>Save Changes</Text>
                     </TouchableOpacity>
                 </View>
+
+                {/* Delete Account */}
+                <View style={[styles.card, styles.dangerCard]}>
+                    <Text style={styles.dangerTitle}>Delete Account</Text>
+                    <Text style={styles.dangerText}>
+                        Permanently delete your account and all your listings. This can't be undone.
+                    </Text>
+                    <TouchableOpacity style={styles.deleteAccountButton} onPress={openDeleteModal} activeOpacity={0.85}>
+                        <Text style={styles.deleteAccountButtonText}>Delete my account</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
+
+            <DeleteAccountModal
+                visible={deleteOpen}
+                deleting={deleting}
+                error={deleteError}
+                onClose={() => setDeleteOpen(false)}
+                onConfirm={handleDeleteAccount}
+            />
         </KeyboardAvoidingView>
     );
 }
