@@ -14,7 +14,8 @@ export const isSessionExpiredError = (error) => error?.code === SESSION_EXPIRED;
 
 // User-facing message for any API error: the server's message when it sends one,
 // otherwise the fallback. Raw axios texts like "Request failed with status code 500"
-// are replaced by the fallback.
+// and HTML error pages (e.g. Express's default 404 or a proxy's 502 page) are
+// replaced by the fallback.
 export const getErrorMessage = (error, fallback = 'Something went wrong') => {
     if (typeof error === 'string') return error || fallback;
 
@@ -23,6 +24,7 @@ export const getErrorMessage = (error, fallback = 'Something went wrong') => {
 
     if (typeof candidate !== 'string' || !candidate) return fallback;
     if (/^Request failed with status code \d+$/.test(candidate)) return fallback;
+    if (/^\s*</.test(candidate)) return fallback;
     return candidate;
 };
 
