@@ -7,6 +7,7 @@ import { Ionicons, FontAwesome, MaterialIcons, FontAwesome5 } from '@expo/vector
 import { Toast } from 'toastify-react-native';
 import truckService from '../../../../../services/truckService';
 import { getErrorMessage, isSessionExpiredError } from '../../../../../utils/apiError';
+import ReportListing from '../ReportListing/ReportListing';
 import { styles } from './InfoStyles';
 
 const formatNumberWithCommas = (num) => {
@@ -170,6 +171,8 @@ const Info = ({ data }) => {
                     </TouchableOpacity>
                 </View>
             </View>
+
+            <ReportListing truckId={data?._id} />
 
             {/* ── Modal ── */}
             <Modal visible={showPopup} transparent animationType="fade" onRequestClose={handleCancel}>

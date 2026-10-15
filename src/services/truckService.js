@@ -21,6 +21,15 @@ const truckService = {
         }
     },
 
+    reportTruck: async (id, payload) => {
+        try {
+            const response = await axiosInstance.post(`${BASE_URL}/${id}/report`, payload);
+            return response.data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     newsLetter: async (payload) => {
         try {
             const response = await axiosInstance.post(`${BASE_URL}/news-letter`, payload);
