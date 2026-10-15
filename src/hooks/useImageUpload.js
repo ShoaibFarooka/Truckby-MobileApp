@@ -39,7 +39,14 @@ function useImageUpload() {
         }
     }, []);
 
-    return { prepare, clear, upload, uploading };
+    // The shrunk photo as a FormData file, or null when no photo was picked. Used by
+    // signup, which sends the photo with the registration request instead of uploading it.
+    const getFile = useCallback(async () => {
+        const job = jobRef.current;
+        return job ? await job.resized : null;
+    }, []);
+
+    return { prepare, clear, upload, uploading, getFile };
 }
 
 export default useImageUpload;
