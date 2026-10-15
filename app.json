@@ -48,6 +48,12 @@
       ],
       "expo-font"
     ],
-    "scheme": "truckby"
+    "scheme": "truckby",
+    "owner": "truckbys-team",
+    "extra": {
+      "eas": {
+        "projectId": "fea42e54-4140-47e2-bbf8-969a387c9126"
+      }
+    }
   }
 }
