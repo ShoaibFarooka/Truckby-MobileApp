@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import {
     View, Text, TextInput, TouchableOpacity,
-    Modal, KeyboardAvoidingView, Platform,
+    Modal, KeyboardAvoidingView, Platform, ActivityIndicator,
 } from 'react-native';
 import { Ionicons, FontAwesome, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
-import { useDispatch } from 'react-redux';
-/* import { HideLoading, ShowLoading } from '../../../../redux/loaderSlice';
-import truckService from '../../../../services/truckService'; */
+import { Toast } from 'toastify-react-native';
+import truckService from '../../../../../services/truckService';
+import { getErrorMessage, isSessionExpiredError } from '../../../../../utils/apiError';
+import ReportListing from '../ReportListing/ReportListing';
 import { styles } from './InfoStyles';
 
 const formatNumberWithCommas = (num) => {
@@ -24,41 +25,68 @@ const formatPhoneNumber = (phone) => {
     return String(phone);
 };
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 const Info = ({ data }) => {
-    const dispatch = useDispatch();
     const [showPopup, setShowPopup] = useState(false);
     const [email, setEmail] = useState('');
     const [message, setMessage] = useState('');
+    const [sending, setSending] = useState(false);
+    // Shown inside the popup: the global loader and toasts render behind a native Modal
+    const [formError, setFormError] = useState('');
 
     const handleSend = async () => {
-        if (!email.trim() || !message.trim()) {
-            alert('Both Email and Message are required!');
+        if (sending) return;
+
+        const trimmedEmail = email.trim();
+        const trimmedMessage = message.trim();
+        if (!trimmedEmail || !trimmedMessage) {
+            setFormError('Both Email and Message are required!');
             return;
         }
+        if (!emailRegex.test(trimmedEmail)) {
+            setFormError('Please enter a valid email address!');
+            return;
+        }
+        if (!data?.email) {
+            setFormError('Seller contact details are unavailable. Please try again later.');
+            return;
+        }
+
         const payload = {
-            email,
-            message,
-            sellerEmail: data?.email,
+            email: trimmedEmail,
+            message: trimmedMessage,
+            sellerEmail: data.email,
             vehicleName: data?.vehicleName,
         };
-        dispatch(ShowLoading());
+
+        setFormError('');
+        setSending(true);
         try {
-            await truckService.sendMessage(payload);
+            const response = await truckService.sendMessage(payload);
+            setShowPopup(false);
             setEmail('');
             setMessage('');
-            alert('Message sent successfully!');
+            Toast.success(response?.message || 'Message sent successfully!');
         } catch (error) {
-            console.error('Error sending message:', error);
+            console.log('Error sending message:', error?.response?.data || error?.message);
+            if (isSessionExpiredError(error)) {
+                // The session-expired toast is already shown; close the popup so it's visible
+                setShowPopup(false);
+                return;
+            }
+            setFormError(getErrorMessage(error, 'Failed to send message. Please try again.'));
         } finally {
-            dispatch(HideLoading());
+            setSending(false);
         }
-        setShowPopup(false);
     };
 
     const handleCancel = () => {
+        if (sending) return;
         setShowPopup(false);
         setEmail('');
         setMessage('');
+        setFormError('');
     };
 
     return (
@@ -144,8 +172,10 @@ const Info = ({ data }) => {
                 </View>
             </View>
 
+            <ReportListing truckId={data?._id} />
+
             {/* ── Modal ── */}
-            <Modal visible={showPopup} transparent animationType="fade">
+            <Modal visible={showPopup} transparent animationType="fade" onRequestClose={handleCancel}>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
                     style={styles.modalOverlay}
@@ -173,20 +203,26 @@ const Info = ({ data }) => {
                             onChangeText={setMessage}
                         />
 
+                        {!!formError && <Text style={styles.errorText}>{formError}</Text>}
+
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
-                                style={styles.cancelButton}
+                                style={[styles.cancelButton, sending && styles.buttonDisabled]}
                                 onPress={handleCancel}
+                                disabled={sending}
                                 activeOpacity={0.8}
                             >
                                 <Text style={styles.cancelText}>Cancel</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
-                                style={styles.sendButton}
+                                style={[styles.sendButton, sending && styles.buttonDisabled]}
                                 onPress={handleSend}
+                                disabled={sending}
                                 activeOpacity={0.8}
                             >
-                                <Text style={styles.sendText}>Send</Text>
+                                {sending
+                                    ? <ActivityIndicator size="small" color="#fff" />
+                                    : <Text style={styles.sendText}>Send</Text>}
                             </TouchableOpacity>
                         </View>
                     </View>

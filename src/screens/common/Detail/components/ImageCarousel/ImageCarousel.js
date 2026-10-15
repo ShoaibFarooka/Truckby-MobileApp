@@ -1,61 +1,95 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import {
-    View, Text, ScrollView,
-    TouchableOpacity, Dimensions,
+    View, ScrollView,
+    TouchableOpacity, useWindowDimensions,
 } from 'react-native';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import Skeleton from '../../../../../components/Skeleton/Skeleton';
 import { styles } from './ImageCarouselStyles';
 
-const { width: screenWidth } = Dimensions.get('window');
-
+// Listings have ~20 full-size photos (3-5MB, ~4000px each). Loading several at
+// once, or auto-sliding through them, made the screen lag, so only the photo on
+// screen is loaded and photos change on swipe/arrow/dot only. expo-image keeps
+// viewed photos in its disk cache, so going back to one is quick.
 const ImageCarousel = ({ images = [] }) => {
+    const { width: screenWidth } = useWindowDimensions();
     const [activeIndex, setActiveIndex] = useState(0);
+    // Photo the slider last came to rest on; kept mounted during a swipe so the
+    // outgoing photo doesn't vanish halfway through
+    const [settledIndex, setSettledIndex] = useState(0);
+    // Per-photo status: 'loaded' | 'error'; anything else is still loading
+    const [photoStatus, setPhotoStatus] = useState({});
     const scrollRef = useRef(null);
 
-    useEffect(() => {
-        if (images.length <= 1) return;
-        const interval = setInterval(() => {
-            setActiveIndex((prev) => {
-                const next = prev + 1 >= images.length ? 0 : prev + 1;
-                scrollRef.current?.scrollTo({ x: next * screenWidth, animated: true });
-                return next;
-            });
-        }, 3000);
-        return () => clearInterval(interval);
-    }, [images]);
+    const clampIndex = (index) => Math.max(0, Math.min(index, images.length - 1));
 
     const goTo = (index) => {
-        const clamped = Math.max(0, Math.min(index, images.length - 1));
-        scrollRef.current?.scrollTo({ x: clamped * screenWidth, animated: true });
-        setActiveIndex(clamped);
+        const target = clampIndex(index);
+        scrollRef.current?.scrollTo({ x: target * screenWidth, animated: true });
+        setActiveIndex(target);
+        setSettledIndex(target);
+    };
+
+    const setStatus = (index, status) => {
+        setPhotoStatus((prev) => (prev[index] === status ? prev : { ...prev, [index]: status }));
     };
 
     if (!images || images.length === 0) return null;
 
     return (
-        <View style={styles.wrapper}>
+        <View style={[styles.wrapper, { width: screenWidth }]}>
             <ScrollView
+                keyboardShouldPersistTaps="handled"
                 ref={scrollRef}
                 horizontal
                 pagingEnabled
                 scrollEventThrottle={16}
                 showsHorizontalScrollIndicator={false}
+                // Track the photo while scrolling so the dots and arrows keep up with
+                // quick swipes; same index = no re-render
+                onScroll={(e) => {
+                    setActiveIndex(clampIndex(Math.round(e.nativeEvent.contentOffset.x / screenWidth)));
+                }}
                 onMomentumScrollEnd={(e) => {
-                    const index = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
-                    setActiveIndex(index);
+                    setSettledIndex(clampIndex(Math.round(e.nativeEvent.contentOffset.x / screenWidth)));
                 }}
             >
-                {images.map((img, index) => (
-                    <Image
-                        key={index}
-                        source={img}
-                        style={[styles.image, { width: screenWidth }]}
-                        contentFit="cover"
-                        cachePolicy="memory-disk"
-                        transition={200}
-                    />
-                ))}
+                {images.map((img, index) => {
+                    const isActive = index === activeIndex;
+                    const isMounted = isActive || index === settledIndex;
+                    const status = photoStatus[index];
+                    const isError = status === 'error';
+                    // Skeleton on the current slot until it loads, and on its neighbours,
+                    // which are what the user sees while swiping
+                    const isNear = Math.abs(index - activeIndex) <= 1;
+                    const showSkeleton = isNear && !isError && !(isMounted && status === 'loaded');
+
+                    return (
+                        // Same-size slot for every photo keeps paging offsets correct
+                        <View key={index} style={[styles.slide, { width: screenWidth }]}>
+                            {showSkeleton && <Skeleton style={styles.slideFill} />}
+
+                            {isError && (
+                                <Ionicons name="image-outline" size={40} color="#9CA3AF" />
+                            )}
+
+                            {isMounted && !isError && (
+                                <Image
+                                    source={img}
+                                    style={styles.slideFill}
+                                    contentFit="cover"
+                                    cachePolicy="disk"
+                                    transition={200}
+                                    priority="high"
+                                    recyclingKey={typeof img === 'string' ? img : undefined}
+                                    onLoad={() => setStatus(index, 'loaded')}
+                                    onError={() => setStatus(index, 'error')}
+                                />
+                            )}
+                        </View>
+                    );
+                })}
             </ScrollView>
 
             {activeIndex > 0 && (

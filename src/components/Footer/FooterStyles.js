@@ -3,76 +3,118 @@ import { StyleSheet } from "react-native";
 export const styles = StyleSheet.create({
     container: {
         backgroundColor: '#333',
-        paddingHorizontal: 8,
-        paddingTop: 24,
-        paddingBottom: 30,
-        justifyContent: "center",
-        alignItems: "center"
+        paddingHorizontal: 24,
+        paddingTop: 32,
+        paddingBottom: 28,
+    },
+
+    // ── Brand ──
+    brand: {
+        alignItems: "center",
+        marginBottom: 28,
     },
     logo: {
         width: 100,
-        height: 120,
-        resizeMode: "contain"
+        height: 100,
+        resizeMode: "contain",
     },
-    subContainer: {
-        marginTop: 40
-    },
-    inputLabel: {
+    tagline: {
         color: "#d1d5dc",
-        marginBottom: 8
+        fontSize: 14,
+        lineHeight: 20,
+        textAlign: "center",
+        marginTop: 8,
+        maxWidth: 280,
+    },
+
+    // ── Shared ──
+    sectionTitle: {
+        color: "#fff",
+        fontSize: 15,
+        fontWeight: "700",
+        marginBottom: 12,
+    },
+
+    // ── Newsletter ──
+    newsletter: {
+        marginBottom: 28,
+    },
+    newsletterText: {
+        color: "#d1d5dc",
+        fontSize: 13,
+        marginTop: -6,
+        marginBottom: 12,
+    },
+    inputWrapper: {
+        justifyContent: "center",
     },
     input: {
-        backgroundColor: "white",
+        backgroundColor: "#fff",
         color: "#101828",
         paddingLeft: 16,
-        paddingRight: 48,
+        paddingRight: 52,
         paddingVertical: 12,
-        borderRadius: 6,
-        fontSize: 16,
-        width: 256,
-        marginBottom: 24,
+        borderRadius: 8,
+        fontSize: 15,
     },
-    iconContainer: {
-        backgroundColor: "#e7000b",
-        alignSelf: "flex-start",
-        padding: 8,
-        borderRadius: 9999,
+    sendButton: {
         position: "absolute",
-        right: 8,
-        top: 5
+        right: 6,
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: "#e7000b",
+        justifyContent: "center",
+        alignItems: "center",
     },
-    menuContainer: {
+
+    // ── Links ──
+    linkColumns: {
         flexDirection: "row",
-        flexWrap: "wrap",
+        gap: 24,
         marginBottom: 24,
-        width: 256,
-        columnGap: 25,
-        rowGap: 5
     },
-    menuItem: {
-        paddingVertical: 4,
+    linkColumn: {
+        flex: 1,
+    },
+    linkItem: {
+        paddingVertical: 6,
         alignSelf: "flex-start",
     },
-    menuItemBorderBottom: {
-        borderBottomWidth: 1,
-        borderBottomColor: "#df0805"
-    },
-    menuText: {
+    linkText: {
+        color: "#d1d5dc",
         fontSize: 14,
-        color: '#fff',
     },
-    activeText: {
-        color: "#df0805"
+    linkTextActive: {
+        color: "#df0805",
+        fontWeight: "600",
     },
-    socialLinksContainer: {
-        flexDirection: "row",
-        gap: 30,
-        marginBottom: 24
-    },
-    socialLink: {
 
+    // ── Bottom bar ──
+    divider: {
+        height: StyleSheet.hairlineWidth,
+        backgroundColor: "#4b5563",
+        marginBottom: 20,
+    },
+    bottomBar: {
+        alignItems: "center",
+        gap: 16,
+    },
+    socialRow: {
+        flexDirection: "row",
+        gap: 14,
+    },
+    socialButton: {
+        width: 38,
+        height: 38,
+        borderRadius: 19,
+        backgroundColor: "#4b5563",
+        justifyContent: "center",
+        alignItems: "center",
     },
     copyrightText: {
-        color: "#fff"
-    }
+        color: "#9ca3af",
+        fontSize: 12,
+        textAlign: "center",
+    },
 });

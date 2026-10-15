@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, ActivityIndicator, Image, Alert, Linking } from "react-native";
+import { View, Text, TextInput, Pressable, ActivityIndicator, Image } from "react-native";
 import { Dropdown } from 'react-native-element-dropdown';
 import * as ImagePicker from 'expo-image-picker';
 import { styles } from "./FormStyles";
@@ -9,18 +9,19 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Feather from '@expo/vector-icons/Feather';
 import { useState } from "react";
 import { Toast } from 'toastify-react-native'
+import { showApiError } from '../../../../../utils/apiError'
 import * as yup from "yup";
 import { countries } from "../../../../../data/countries";
 import { states } from "../../../../../data/states";
 import useForm from "../../../../../hooks/useForm";
 import useApi from "../../../../../hooks/useApi";
-import uploadService from "../../../../../services/uploadService";
+import useImageUpload from "../../../../../hooks/useImageUpload";
 import userService from "../../../../../services/userService";
 
 const schema = yup.object().shape({
     fullName: yup.string().required('Full Name is required'),
     userName: yup.string().required('Username is required'),
-    gender: yup.string().required('Gender is required'),
+    gender: yup.string().optional(),
     country: yup.string().required('Country is required'),
     state: yup.string().when('country', {
         is: (val) => val === 'United States',
@@ -51,7 +52,7 @@ const Form = () => {
     };
     const form = useForm(initialValues, schema);
     const { execute, loading } = useApi(userService.registerUser);
-    const { execute: uploadImage, loading: uploading } = useApi(uploadService.uploadImg)
+    const { prepare: prepareImage, clear: clearImage, getFile: getImageFile } = useImageUpload();
     const [secure, setSecure] = useState(true);
     const [confirmSecure, setConfirmSecure] = useState(true);
     const [image, setImage] = useState(null);
@@ -65,81 +66,53 @@ const Form = () => {
     ];
 
     const handleImageUpload = async () => {
-        // Ask for permission
-        const { status, canAskAgain } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted' && canAskAgain) {
-            Alert.alert('Permission to access media library is required!');
-            return;
-        } else if (status !== 'granted' && !canAskAgain) {
-            Alert.alert(
-                'Permission Required',
-                'Media library access has been denied. Please enable it in settings to proceed.',
-                [
-                    { text: 'Cancel', style: 'cancel' },
-                    {
-                        text: 'Open Settings',
-                        onPress: () => Linking.openSettings(),
-                    },
-                ]
-            );
-            return;
-        }
-
-        // Open image picker
+        // No permission request and no crop step: the system photo picker needs no
+        // permission, and allowsEditing forces the slow legacy picker on iOS. The
+        // preview crops the photo to its frame with "cover".
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'],
-            quality: 1,
-            allowsEditing: true,
-            aspect: [1, 1], // makes it square
+            quality: 0.8,
         });
 
-        console.log("Upload: ", result.assets[0]);
+        // assets is null when the user cancels, so check before reading it
+        if (result.canceled || !result.assets?.length) return;
 
-        if (!result.canceled) {
-            setImage(result.assets[0]);
-        }
+        setImage(result.assets[0]);
+        // Shrink it now on the device; it is only uploaded on submit
+        prepareImage(result.assets[0]);
+    };
+
+    const handleClearImage = () => {
+        setImage(null);
+        clearImage();
     };
 
     const handleSubmit = async (values) => {
-        let imageUrl = '';
-        if (image && image.uri) {
-            const imgForm = new FormData();
+        // The photo goes with the signup request; the server only uploads it
+        // once the signup is valid, so there is no public upload endpoint
+        const payload = new FormData();
+        payload.append('name', values.fullName);
+        payload.append('userName', values.userName);
+        payload.append('gender', values.gender);
+        payload.append('country', values.country);
+        payload.append('state', values.state);
+        payload.append('city', values.city);
+        payload.append('email', values.email);
+        payload.append('password', values.password);
+        payload.append('companyName', values.companyName);
+        payload.append('phone', values.phone);
 
-            const imageData = {
-                uri: image.uri,
-                name: image.fileName,
-                type: image.mimeType
-            };
-            imgForm.append('images', imageData);
-            try {
-                const response = await uploadImage(imgForm);
-                imageUrl = response?.urls[0] || "";
-            } catch (error) {
-                Toast.error(error);
-                return;
-            }
-        }
+        // Already shrunk when picked, so this is small
+        const imageFile = await getImageFile();
+        if (imageFile) payload.append('image', imageFile);
 
-        const payload = {
-            name: values.fullName,
-            userName: values.userName,
-            gender: values.gender,
-            country: values.country,
-            state: values.state,
-            city: values.city,
-            email: values.email,
-            password: values.password,
-            companyName: values.companyName,
-            phone: Number(values.phone),
-            image: imageUrl,
-        };
         try {
             const response = await execute(payload, "seller");
             Toast.success(response.message);
             form.resetForm();
             navigation.replace("Login");
         } catch (error) {
-            Toast.error(error);
+            showApiError(error, "Unable to sign up. Please try again.");
         }
     };
 
@@ -157,7 +130,7 @@ const Form = () => {
                     )}
                 </Pressable>
                 {(image && image.uri) && (
-                    <Pressable onPress={() => setImage(null)} style={({ pressed }) => [styles.clearButton, pressed && styles.buttonPressed]}>
+                    <Pressable onPress={handleClearImage} style={({ pressed }) => [styles.clearButton, pressed && styles.buttonPressed]}>
                         <Ionicons name="close" size={16} color="white" />
                     </Pressable>
                 )}
@@ -226,7 +199,7 @@ const Form = () => {
                     <Feather name="user" size={20} color="#9ca3af" style={[styles.icon, styles.leftIcon]} />
                     <Dropdown
                         style={styles.input}
-                        placeholder="Select Gender"
+                        placeholder="Select Gender (optional)"
                         placeholderStyle={{ color: "#9ca3af" }}
                         iconStyle={{ marginRight: 16, width: 20, height: 20 }}
                         labelField="label"
@@ -351,15 +324,15 @@ const Form = () => {
             </View>
 
             <Pressable
-                disabled={loading || uploading}
+                disabled={loading}
                 onPress={() => form.onSubmit(handleSubmit)}
                 style={({ pressed }) => [
                     styles.button,
-                    (loading || uploading) && styles.buttonDisabled,
+                    loading && styles.buttonDisabled,
                     pressed && styles.buttonPressed
                 ]}
             >
-                {(loading || uploading) ? (
+                {loading ? (
                     <>
                         <ActivityIndicator color="#ffffff" style={{ marginRight: 8 }} />
                         <Text style={styles.buttonText}>Signing up...</Text>

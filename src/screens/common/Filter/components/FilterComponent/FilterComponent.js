@@ -199,7 +199,7 @@ const FilterComponent = ({ filters, setFilters, onFilterChange, onClose }) => {
                 {activeEntries.length === 0 ? (
                     <Text style={styles.noFiltersText}>No filters applied</Text>
                 ) : (
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
+                    <ScrollView keyboardShouldPersistTaps="handled" horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chipRow}>
                         {activeEntries.map(([key, value]) => {
                             if (Array.isArray(value)) {
                                 return value.map((v, i) => (

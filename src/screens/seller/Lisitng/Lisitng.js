@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { useDispatch } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { Toast } from "toastify-react-native";
+import { showApiError } from "../../../utils/apiError";
 import TruckCard from "./components/TruckCard";
 import ExpirePlan from "./components/ExpirePlan";
 import DeleteConfirmationModal from "../../../components/Delete/DeleteConformationModal.js";
@@ -10,27 +11,6 @@ import truckService from "../../../services/truckService";
 import subscriptionService from "../../../services/subscriptionService";
 import { hideLoader, showLoader } from "../../../redux/loaderSlice";
 import { styles } from "./LisitngStyles.js";
-
-const showToast = (type, message) => {
-    switch (type) {
-        case "success":
-            Toast.success(message);
-            break;
-        case "error":
-            Toast.error(message);
-            break;
-        case "info":
-            Toast.info(message);
-            break;
-        case "warn":
-        case "warning":
-            Toast.warn(message);
-            break;
-        default:
-            Toast.show?.(message);
-    }
-};
-
 
 const Listing = () => {
     const dispatch = useDispatch();
@@ -59,7 +39,7 @@ const Listing = () => {
             setListData(response.data);
             setTotalPages(response.totalPages || 1);
         } catch (error) {
-            console.error("Error fetching services:", error);
+            showApiError(error, "Unable to load your listings");
         } finally {
             dispatch(hideLoader());
         }
@@ -80,11 +60,10 @@ const Listing = () => {
         try {
             await truckService.deleteTruck(deleteTruckId);
             setListData((prev) => prev.filter((list) => list._id !== deleteTruckId));
-            showToast("success", "Equipment deleted successfully");
+            Toast.success("Equipment deleted successfully");
             await fetchAllTrucks(page);
         } catch (error) {
-            console.error("Error deleting service:", error);
-            showToast("error", "Failed to delete service");
+            showApiError(error, "Failed to delete equipment");
         } finally {
             dispatch(hideLoader());
             setDeleteOpen(false);
@@ -101,7 +80,7 @@ const Listing = () => {
                     setProductData(response.productData);
                 }
             } catch (error) {
-                showToast("error", error?.response?.data?.error || "Something went wrong");
+                showApiError(error, "Unable to load your subscription");
             } finally {
                 dispatch(hideLoader());
             }
@@ -112,8 +91,7 @@ const Listing = () => {
 
     const isLimitExceeded = () => {
         if (listData.length >= productData?.listings) {
-            showToast(
-                "error",
+            Toast.error(
                 `Your current membership allows only up to ${productData?.listings} listing${productData?.listings > 1 ? "s" : ""
                 }. You can't exceed this limit.`
             );
@@ -126,13 +104,13 @@ const Listing = () => {
         if (info.status) {
             if (!isLimitExceeded()) navigation.navigate("AddTruck");
         } else {
-            navigation.navigate("Plans");
+            Toast.info("You need an active plan to add listings.");
         }
     };
 
     return (
         <View style={styles.screen}>
-            <ScrollView contentContainerStyle={styles.container}>
+            <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.container}>
                 <View style={styles.headerRow}>
                     <Text style={styles.headerTitle}>My Listings</Text>
                     <TouchableOpacity style={styles.addButton} onPress={handleAddEquipment}>

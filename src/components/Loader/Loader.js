@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { View, Modal } from 'react-native';
+import { View } from 'react-native';
 import { styles } from "./LoaderStyles";
 import * as Animatable from 'react-native-animatable';
 import { useSelector } from 'react-redux';
@@ -38,31 +38,27 @@ const Loader = () => {
     if (!isVisible) return null;
 
     return (
-        <Modal
-            visible={isVisible}
-            transparent
-            animationType="fade"
-        >
-            <View style={styles.overlay}>
-                <Animatable.Image
-                    animation="fadeInDown"
-                    duration={1500}
-                    source={require('../../../assets/images/logo.png')}
-                    style={styles.logo}
-                    resizeMode="contain"
-                />
+        // Plain overlay instead of <Modal>: a native modal presented or dismissed
+        // during a screen transition can get stuck on top of the app
+        <View style={styles.overlay}>
+            <Animatable.Image
+                animation="fadeInDown"
+                duration={1500}
+                source={require('../../../assets/images/logo.png')}
+                style={styles.logo}
+                resizeMode="contain"
+            />
 
-                <View style={styles.dotsContainer}>
-                    {[...Array(dotsCount)].map((_, i) => (
-                        <Animatable.View
-                            key={i}
-                            ref={(ref) => (dotRefs.current[i] = ref)}
-                            style={styles.dot}
-                        />
-                    ))}
-                </View>
+            <View style={styles.dotsContainer}>
+                {[...Array(dotsCount)].map((_, i) => (
+                    <Animatable.View
+                        key={i}
+                        ref={(ref) => (dotRefs.current[i] = ref)}
+                        style={styles.dot}
+                    />
+                ))}
             </View>
-        </Modal>
+        </View>
     );
 };
 

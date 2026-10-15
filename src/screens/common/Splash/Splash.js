@@ -6,7 +6,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigation } from '@react-navigation/native';
 import { setAuth } from '../../../redux/authSlice';
 import { verifyAuthentication } from '../../../utils/authUtils';
-import useApi from '../../../hooks/useApi';
 import userService from '../../../services/userService';
 
 const logo = require('../../../../assets/images/logo.png');
@@ -18,46 +17,53 @@ const Splash = () => {
     const [activeDot, setActiveDot] = useState(0);
     const dotRefs = useRef([]);
 
-    const { execute, loading } = useApi(userService.refreshToken);
     const { accessToken } = useSelector(state => state.auth);
     const isAuthenticated = verifyAuthentication(accessToken);
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
     useEffect(() => {
-        const handleAuthOnStartup = async () => {
-            // Ensure splash screen shows for at least 2 seconds
-            const delay = new Promise(resolve => setTimeout(resolve, 2000));
+        let cancelled = false;
 
-            if (isAuthenticated) {
-                await delay;
-                navigation.replace('Home');
-                return;
-            }
+        // Restore the session if possible; guests continue to Home either way
+        const restoreSession = async () => {
+            if (isAuthenticated) return;
 
             const refreshToken = await SecureStore.getItemAsync('refreshToken');
-            if (!refreshToken) {
-                await delay;
-                navigation.replace('Login');
-                return;
-            }
+            if (!refreshToken) return;
 
             try {
                 console.log("Refreshing Token On Startup....");
-                const response = await execute({ refreshToken });
-                if (response.newAccessToken && response.newRefreshToken && response.user) {
+                const response = await userService.refreshToken({ refreshToken });
+                if (response?.newAccessToken && response?.newRefreshToken && response?.user) {
                     await SecureStore.setItemAsync('refreshToken', response.newRefreshToken);
-                    dispatch(setAuth({ token: response.newAccessToken, user: response.user }))
-                    navigation.replace("Home");
+                    if (!cancelled) {
+                        dispatch(setAuth({ token: response.newAccessToken, user: response.user }));
+                    }
                 }
             } catch (error) {
-                await SecureStore.deleteItemAsync('refreshToken');
-                navigation.replace('Login');
+                // Only clear the token if the server rejected it, not on network errors
+                if (error?.response) {
+                    await SecureStore.deleteItemAsync('refreshToken');
+                }
             }
         };
 
+        const handleAuthOnStartup = async () => {
+            // Ensure splash screen shows for at least 2 seconds
+            const delay = new Promise(resolve => setTimeout(resolve, 2000));
+            await Promise.all([restoreSession(), delay]);
+            if (!cancelled) navigation.replace('Home');
+        };
+
         handleAuthOnStartup();
-    }, [accessToken, dispatch, navigation]);
+
+        return () => {
+            cancelled = true;
+        };
+        // Run once on mount; re-running after setAuth would navigate twice
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     useEffect(() => {
         // Animate the current active dot

@@ -22,7 +22,7 @@ const ContactUs = () => {
 
                 <Text style={styles.paragraph}>
                     Have something for sale?{' '}
-                    <TouchableOpacity style={styles.clickable} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} onPress={() => navigation.navigate(user?.email ? 'SellerListing' : 'Login')}>
+                    <TouchableOpacity style={styles.clickable} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} onPress={() => navigation.navigate(user?.email ? 'Listing' : 'Login')}>
                         <Text style={styles.link}>Sell Your Equipment</Text>
                     </TouchableOpacity>
                 </Text>

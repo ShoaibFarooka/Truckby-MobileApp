@@ -10,7 +10,6 @@ import AddTruck from '../screens/seller/AddTruck/AddTruck.js';
 // import NotFound from '../screens/common/NotFound/NotFound.js';
 import SellerProfile from '../screens/common/Profile/SellerProfile.js';
 import Plans from '../screens/seller/Plans/Plans.js';
-import SuccessPage from '../screens/seller/Plans/components/ConformationModal.js';
 import Listing from "../screens/seller/Lisitng/Lisitng.js";
 import Inventory from '../screens/common/Inventory/Inventory.js';
 
@@ -20,7 +19,6 @@ const routes = [
     { name: "AddTruck", component: AddTruck, protected: true, allowedRoles: ['seller'], authRedirect: false, showHeader: true, showFooter: true },
     { name: "EditTruck", component: AddTruck, protected: true, allowedRoles: ['seller'], authRedirect: false, showHeader: true, showFooter: true },
     { name: "Profile", component: SellerProfile, protected: true, allowedRoles: ['seller'], authRedirect: false, showHeader: true, showFooter: true },
-    { name: "Success", component: SuccessPage, protected: true, allowedRoles: ['seller'], authRedirect: false, showHeader: true, showFooter: true },
     { name: "Plans", component: Plans, protected: true, allowedRoles: ['seller'], authRedirect: false, showHeader: true, showFooter: true },
 
     //common

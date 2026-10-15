@@ -65,9 +65,7 @@ export default StyleSheet.create({
     },
 
     row: {
-        flexDirection: "column",
         justifyContent: "space-between",
-        marginBottom: 15,
     },
 
     pagination: {

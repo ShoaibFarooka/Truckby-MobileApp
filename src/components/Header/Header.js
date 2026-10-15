@@ -3,9 +3,9 @@ import { View, Text, TouchableOpacity, Pressable } from "react-native";
 import { Image } from 'expo-image';
 import { styles } from "./HeaderStyles";
 import Feather from '@expo/vector-icons/Feather';
-import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation, useNavigationState } from "@react-navigation/native";
 import { Toast } from 'toastify-react-native';
+import { showApiError } from '../../utils/apiError';
 import { useDispatch, useSelector } from "react-redux";
 import { showLoader, hideLoader } from "../../redux/loaderSlice";
 import { clearAuth } from "../../redux/authSlice";
@@ -16,34 +16,60 @@ import userService from "../../services/userService";
 const logo = require("../../../assets/images/logo.png");
 const profile = require('../../../assets/images/person.png');
 
+// Full-width row so the whole line is tappable, not just the text
+const MenuRow = ({ icon, label, active, danger, onPress }) => {
+    const color = danger || active ? '#df0805' : '#333';
+    return (
+        <Pressable
+            onPress={onPress}
+            style={({ pressed }) => [
+                styles.menuItem,
+                active && styles.menuItemActive,
+                pressed && styles.menuItemPressed,
+            ]}
+        >
+            <Feather name={icon} size={20} color={color} />
+            <Text style={[styles.menuText, { color }, active && styles.menuTextActive]}>{label}</Text>
+        </Pressable>
+    );
+};
+
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isProfileOpen, setIsProfileOpen] = useState(false);
 
     const routes = useNavigationState((state) => state.routes);
     const currentRoute = routes[routes.length - 1];
     const currentScreen = currentRoute?.name;
 
     const { user } = useSelector((state) => state.auth);
-    const { execute, loading } = useApi(userService.logoutUser);
+    const { execute } = useApi(userService.logoutUser);
     const dispatch = useDispatch();
     const navigation = useNavigation();
 
     const navLinks = [
-        { name: 'Home', screen: 'Home', protected: false },
-        { name: 'Listing', screen: 'Listing', protected: true },
-        { name: 'Inventory', screen: 'Inventory', protected: true },
-        { name: 'Plans', screen: 'Plans', protected: true },
-        { name: 'Privacy', screen: 'Privacy', protected: false },
-        { name: 'Contact Us', screen: 'ContactUs', protected: false },
+        { name: 'Home', screen: 'Home', icon: 'home', protected: false },
+        { name: 'Listing', screen: 'Listing', icon: 'list', protected: true },
+        { name: 'Inventory', screen: 'Inventory', icon: 'truck', protected: true },
+        { name: 'My Plan', screen: 'Plans', icon: 'credit-card', protected: true },
+        { name: 'Privacy', screen: 'Privacy', icon: 'shield', protected: false },
+        { name: 'Contact Us', screen: 'ContactUs', icon: 'mail', protected: false },
     ];
 
     const toggleMenu = () => {
         setIsMenuOpen((prev) => !prev);
-        setIsProfileOpen(false);
     };
 
+    // Inventory also shows other sellers, so it only counts as "here" for the user's own inventory
+    const isActive = (screen) =>
+        screen === currentScreen &&
+        (screen !== "Inventory" || currentRoute?.params?.userId === user?._id);
+
     const handleNavigate = (screen) => {
+        // Close the menu on every tap, so it isn't left open behind the next screen
+        setIsMenuOpen(false);
+        // Already here: closing the menu is enough
+        if (isActive(screen)) return;
+
         if (screen === "Inventory") {
             navigation.navigate("Inventory", {
                 userId: user._id,
@@ -55,6 +81,7 @@ const Header = () => {
     };
 
     const handleLogout = async () => {
+        setIsMenuOpen(false);
         try {
             dispatch(showLoader());
             const refreshToken = await SecureStore.getItemAsync('refreshToken');
@@ -64,7 +91,7 @@ const Header = () => {
             dispatch(clearAuth());
             navigation.replace("Login");
         } catch (error) {
-            Toast.error(error);
+            showApiError(error, "Unable to log out. Please try again.");
         } finally {
             dispatch(hideLoader());
         }
@@ -90,17 +117,35 @@ const Header = () => {
 
             {isMenuOpen && (
                 <View style={styles.menuContainer}>
-                    {navLinks.map((item, index) => {
-                        if (item.protected && !user) return null;
+                    {user && (
+                        <View style={styles.accountCard}>
+                            <Image
+                                source={user?.image ? user.image : profile}
+                                style={styles.profileImage}
+                                contentFit="cover"
+                                cachePolicy="memory-disk"
+                            />
+                            <View style={styles.accountInfo}>
+                                <Text style={styles.accountName} numberOfLines={1}>
+                                    {user.name || user.userName}
+                                </Text>
+                                {!!user.email && (
+                                    <Text style={styles.accountEmail} numberOfLines={1}>{user.email}</Text>
+                                )}
+                            </View>
+                        </View>
+                    )}
 
+                    {navLinks.map((item) => {
+                        if (item.protected && !user) return null;
                         return (
-                            <TouchableOpacity
-                                key={index}
+                            <MenuRow
+                                key={item.screen}
+                                icon={item.icon}
+                                label={item.name}
+                                active={isActive(item.screen)}
                                 onPress={() => handleNavigate(item.screen)}
-                                style={[styles.menuItem, currentScreen === item.screen && styles.menuItemBorderBottom]}
-                            >
-                                <Text style={[styles.menuText, currentScreen === item.screen && styles.activeText]}>{item.name}</Text>
-                            </TouchableOpacity>
+                            />
                         );
                     })}
 
@@ -121,52 +166,21 @@ const Header = () => {
                             </TouchableOpacity>
                         </>
                     ) : (
-                        <View style={styles.profileSection}>
-                            <Pressable
-                                onPress={() => setIsProfileOpen(!isProfileOpen)}
-                                style={styles.profileContainer}
-                            >
-                                <Image
-                                    source={user?.image ? user.image : profile}
-                                    style={styles.profileImage}
-                                    contentFit="cover"
-                                    cachePolicy="memory-disk"
-                                />
-                                <Text style={styles.profileName}>
-                                    {user.userName?.split('@')[0].slice(0, 10)}
-                                </Text>
-                                <View style={styles.profileIconConatiner}>
-                                    {isProfileOpen ?
-                                        <AntDesign name="up" size={14} />
-                                        :
-                                        <AntDesign name="down" size={14} />
-                                    }
-                                </View>
-                            </Pressable>
-
-                            {isProfileOpen && (
-                                <View style={styles.dropdown}>
-                                    <TouchableOpacity
-                                        style={{ width: "100%" }}
-                                        onPress={() => {
-                                            setIsProfileOpen(false);
-                                            handleNavigate('Profile');
-                                        }}
-                                    >
-                                        <Text style={styles.dropdownItem}>Profile</Text>
-                                    </TouchableOpacity>
-
-                                    <TouchableOpacity
-                                        style={{ width: "100%" }}
-                                        onPress={handleLogout}
-                                    >
-                                        <Text style={[styles.dropdownItem, { color: 'red' }]}>
-                                            Log out
-                                        </Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        </View>
+                        <>
+                            <View style={styles.divider} />
+                            <MenuRow
+                                icon="user"
+                                label="My Profile"
+                                active={isActive('Profile')}
+                                onPress={() => handleNavigate('Profile')}
+                            />
+                            <MenuRow
+                                icon="log-out"
+                                label="Log out"
+                                danger
+                                onPress={handleLogout}
+                            />
+                        </>
                     )}
                 </View>
             )}

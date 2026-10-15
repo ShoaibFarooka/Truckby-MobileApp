@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import axiosInstance, { UPLOAD_TIMEOUT } from "./axiosInstance";
 
 const BASE_URL = "/api/user";
 
@@ -13,6 +13,7 @@ const userService = {
       throw error;
     }
   },
+  // formData is a FormData with the signup fields and the optional "image" file
   registerUser: async (formData, userType) => {
     try {
       const response = await axiosInstance.post(
@@ -21,6 +22,9 @@ const userService = {
         {
           withCredentials: true,
           skipAuthRefresh: true,
+          headers: { "Content-Type": "multipart/form-data" },
+          // The request carries the profile photo when one was picked
+          timeout: UPLOAD_TIMEOUT,
         }
       );
       return response.data;
@@ -94,17 +98,13 @@ const userService = {
       throw error;
     }
   },
-  updateUserProfile: async (payload, id) => {
+  deleteAccount: async (payload) => {
     try {
-      const response = await axiosInstance.patch(
-        `${BASE_URL}/update-user-profile/${id}`,
-        payload,
-        {
-          withCredentials: true,
-          skipAuthRefresh: true,
-          headers: { "Content-Type": "multipart/form-data" },
-        }
-      );
+      const response = await axiosInstance.delete(`${BASE_URL}/delete-account`, {
+        data: payload,
+        // The server cancels the Stripe subscription and deletes images first
+        timeout: 60000,
+      });
       return response.data;
     } catch (error) {
       throw error;

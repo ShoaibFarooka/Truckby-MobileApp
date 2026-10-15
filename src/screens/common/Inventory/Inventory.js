@@ -6,13 +6,13 @@ import {
     TouchableOpacity,
     FlatList,
     ActivityIndicator,
-    ScrollView,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { useRoute } from "@react-navigation/native";
 import { useDispatch } from "react-redux";
 import { Ionicons } from "@expo/vector-icons";
 import { Toast } from "toastify-react-native";
+import { showApiError } from "../../../utils/apiError";
 
 import styles from "./InventoryStyles";
 
@@ -20,31 +20,11 @@ import { showLoader, hideLoader } from "../../../redux/loaderSlice";
 import truckService from "../../../services/truckService";
 import { formatPhoneNumber } from "../../../utils/extra";
 
-import InventoryTruckCard from "./components/InventoryTruckCard";
+import TruckCard from "../../../components/TruckCard/TruckCard";
+import EmptyState from "../../../components/EmptyState/EmptyState";
 import InventoryFallback from "./components/InventoryFallback";
 
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL || "";
-
-const showToast = (type, message) => {
-    switch (type) {
-        case "success":
-            Toast.success(message);
-            break;
-        case "error":
-            Toast.error(message);
-            break;
-        case "info":
-            Toast.info(message);
-            break;
-        case "warn":
-        case "warning":
-            Toast.warn(message);
-            break;
-        default:
-            Toast.info(message);
-    }
-};
-
 
 const Inventory = () => {
     const route = useRoute();
@@ -57,6 +37,8 @@ const Inventory = () => {
     const [trucks, setTrucks] = useState([]);
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    // 'loading' | 'ready' | 'error'; the empty message only shows once loading is done
+    const [listStatus, setListStatus] = useState('loading');
 
     const isValidUserId = /^[0-9a-fA-F]{24}$/.test(userId);
 
@@ -81,10 +63,12 @@ const Inventory = () => {
                 image: user.image,
             });
 
-            setTrucks(trucks);
-            setTotalPages(totalPages);
+            setTrucks(trucks || []);
+            setTotalPages(totalPages || 1);
+            setListStatus('ready');
         } catch (error) {
-            showToast("error", "Unable to fetch Inventory try again!");
+            showApiError(error, "Unable to fetch Inventory try again!");
+            setListStatus('error');
         } finally {
             dispatch(hideLoader());
         }
@@ -92,14 +76,14 @@ const Inventory = () => {
 
     useEffect(() => {
         if (userId && isValidUserId) {
-            fetchInventory();
+            fetchInventory(page);
         }
     }, [userId, page]);
 
+    // The effect above fetches when page changes, so don't fetch here too
     const handlePageChange = (newPage) => {
         if (newPage >= 1 && newPage <= totalPages) {
             setPage(newPage);
-            fetchInventory(newPage);
         }
     };
 
@@ -108,9 +92,9 @@ const Inventory = () => {
 
         try {
             await Clipboard.setStringAsync(shareableLink);
-            showToast("success", "Link copied to ClipBoard");
+            Toast.success("Link copied to ClipBoard");
         } catch (error) {
-            showToast("error", "Unable to copy link try again!");
+            Toast.error("Unable to copy link try again!");
         }
     };
 
@@ -119,7 +103,9 @@ const Inventory = () => {
     }
 
     return (
-        <ScrollView contentContainerStyle={styles.container}>
+        // Plain View: Layout already provides the ScrollView, and a nested
+        // vertical ScrollView competes with it for touches
+        <View style={styles.container}>
             <View style={styles.card}>
                 <View style={styles.topSection}>
                     <Image
@@ -163,19 +149,45 @@ const Inventory = () => {
             </View>
 
             <FlatList
+                keyboardShouldPersistTaps="handled"
                 data={trucks}
                 scrollEnabled={false}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item, index) => item?._id || index.toString()}
                 numColumns={2}
                 columnWrapperStyle={styles.row}
                 renderItem={({ item }) => (
-                    <InventoryTruckCard
+                    <TruckCard
+                        images={item?.images}
+                        title={item?.vehicleName}
+                        price={item?.vehiclePrice}
+                        country={item?.country}
+                        state={item?.state}
+                        miles={item?.mileage}
+                        featured={item?.Featured === true}
                         data={item}
-                        handleDeleteClick={() => { }}
                     />
                 )}
             />
 
+            {listStatus === 'ready' && trucks.length === 0 && (
+                <EmptyState
+                    icon="cube-outline"
+                    title="No equipment listed yet"
+                    message="This seller doesn't have any listings right now. Check back later."
+                />
+            )}
+
+            {listStatus === 'error' && (
+                <EmptyState
+                    icon="cloud-offline-outline"
+                    title="Couldn't load this inventory"
+                    message="Please check your connection and try again."
+                    actionLabel="Try Again"
+                    onAction={() => fetchInventory(page)}
+                />
+            )}
+
+            {trucks.length > 0 && (
             <View style={styles.pagination}>
                 <TouchableOpacity
                     disabled={page === 1}
@@ -204,7 +216,8 @@ const Inventory = () => {
                     <Text>Next</Text>
                 </TouchableOpacity>
             </View>
-        </ScrollView>
+            )}
+        </View>
     );
 };
 

@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { getErrorMessage } from "../utils/apiError";
 
 function useApi(apiFunction) {
     const [data, setData] = useState(null);
@@ -13,10 +14,11 @@ function useApi(apiFunction) {
             setData(result);
             return result;
         } catch (err) {
-            console.log("UseAPI Error: ", err?.response?.data || err);
-            const errMsg = err?.response?.data?.error || err?.response?.data || err.message || "Unknown error";
-            setError(errMsg);
-            throw errMsg;
+            console.log("UseAPI Error: ", err?.response?.data || err?.message);
+            setError(getErrorMessage(err));
+            // Rethrow the original error so callers can use showApiError, which
+            // stays silent for session expiry and shows the server message otherwise
+            throw err;
         } finally {
             setLoading(false);
         }

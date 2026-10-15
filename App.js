@@ -13,14 +13,21 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <Provider store={store}>
         <SafeAreaProvider>
-          <Loader />
-
           <NavigationContainer>
             <Navigator />
           </NavigationContainer>
 
+          {/* Rendered after the navigator so the overlay sits on top of every screen */}
+          <Loader />
+
           <StatusBar style="auto" />
-          <ToastManager showCloseIcon={false} showProgressBar={false} topOffset={60}
+          {/* useModal={false}: the default Modal mode blocks every tap and scroll
+              on the screen until the toast disappears */}
+          <ToastManager
+            useModal={false}
+            showCloseIcon={false}
+            showProgressBar={false}
+            topOffset={60}
           />
         </SafeAreaProvider>
       </Provider>

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { View, ScrollView } from 'react-native';
+import { View } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { showLoader, hideLoader } from '../../../redux/loaderSlice';
 import truckService from '../../../services/truckService';
+import { showApiError } from '../../../utils/apiError';
 import ImageCarousel from './components/ImageCarousel/ImageCarousel';
 import Info from './components/Info/Info';
 import DetailInfo from './components/DetailInfo/DetailInfo';
@@ -36,7 +37,7 @@ const DetailPage = ({ route }) => {
                     const response = await truckService.getTruckById(id);
                     setData(response);
                 } catch (err) {
-                    console.error('Error fetching truck:', err);
+                    showApiError(err, 'Unable to load this listing');
                 } finally {
                     dispatch(hideLoader());
                 }
@@ -92,11 +93,13 @@ const DetailPage = ({ route }) => {
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        // Plain View: Layout already provides the ScrollView, and a nested
+        // vertical ScrollView competes with it for touches
+        <View style={styles.container}>
             <ImageCarousel images={data?.images || []} />
             <Info data={data} />
             <DetailInfo data={sampleData} />
-        </ScrollView>
+        </View>
     );
 };
 

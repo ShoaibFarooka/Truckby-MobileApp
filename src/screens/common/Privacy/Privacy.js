@@ -11,20 +11,20 @@ const Privacy = () => {
             {/* Privacy Policy */}
             <View style={styles.sectionContainer}>
                 <Text style={styles.title}>TRUCKBY PRIVACY POLICY</Text>
-                <Text style={styles.date}>Last Updated: May 5, 2025</Text>
+                <Text style={styles.date}>Last Updated: October 15, 2026</Text>
 
                 <View style={styles.content}>
                     <View style={styles.block}>
                         <Text style={styles.heading}>1. INTRODUCTION</Text>
                         <Text style={styles.paragraph}>
-                            Truckby ("we", "our", or "us") is committed to protecting the privacy of our users. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our platform, including www.truckby.com.
+                            Truckby ("we", "our", or "us") is committed to protecting the privacy of our users. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our platform, including www.truckby.com and the Truckby mobile app.
                         </Text>
                     </View>
 
                     <View style={styles.block}>
                         <Text style={styles.heading}>2. INFORMATION WE COLLECT</Text>
                         <Text style={styles.paragraph}>
-                            We may collect personal information such as your name, email, phone number, location, IP address, device information, cookies, and usage data. This includes data submitted by you and data collected automatically.
+                            We may collect personal information such as your name, email, phone number, location, IP address, device information, cookies, and usage data. This includes data submitted by you and data collected automatically. For sellers, this also includes your company name, address, profile photo, the details and photos of your listings, and your subscription and payment history. Card details are handled by our payment processor, Stripe, and are never stored by us.
                         </Text>
                     </View>
 
@@ -39,7 +39,7 @@ const Privacy = () => {
                         <Text style={styles.heading}>4. SHARING OF INFORMATION</Text>
                         <Text style={styles.paragraph}>We may share your information with:</Text>
                         <Text style={styles.paragraph}>{`\u2022`} Sellers and advertisers you engage with</Text>
-                        <Text style={styles.paragraph}>{`\u2022`} Third-party service providers (e.g., hosting, analytics, payment processors)</Text>
+                        <Text style={styles.paragraph}>{`\u2022`} Third-party service providers (e.g., Stripe for payments, Amazon Web Services for photo storage, hosting and analytics providers)</Text>
                         <Text style={styles.paragraph}>{`\u2022`} Legal authorities where required</Text>
                         <Text style={styles.paragraph}>{`\u2022`} Our affiliates for internal business purposes</Text>
                     </View>
@@ -61,26 +61,33 @@ const Privacy = () => {
                     <View style={styles.block}>
                         <Text style={styles.heading}>7. YOUR RIGHTS</Text>
                         <Text style={styles.paragraph}>
-                            You may request access, correction, or deletion of your personal data by contacting us. California residents may have additional rights under the CCPA.
+                            You may request access to or correction of your personal data by contacting info@truckby.com. You can delete your account at any time from My Profile on www.truckby.com or in the Truckby app; see www.truckby.com/delete-account for details. Residents of California may have additional rights under the CCPA.
                         </Text>
                     </View>
 
                     <View style={styles.block}>
-                        <Text style={styles.heading}>8. CHILDREN</Text>
+                        <Text style={styles.heading}>8. DATA RETENTION & ACCOUNT DELETION</Text>
+                        <Text style={styles.paragraph}>
+                            When you delete your account, we delete your profile, your listings and their photos, and any active subscription is cancelled immediately without a refund for the remaining time. We keep a record of past subscription payments (plan, amount and dates), without your name or contact details, for accounting and business statistics. Stripe keeps its own payment records as required by law.
+                        </Text>
+                    </View>
+
+                    <View style={styles.block}>
+                        <Text style={styles.heading}>9. CHILDREN</Text>
                         <Text style={styles.paragraph}>
                             Our services are not intended for users under 18. We do not knowingly collect personal data from minors.
                         </Text>
                     </View>
 
                     <View style={styles.block}>
-                        <Text style={styles.heading}>9. CHANGES</Text>
+                        <Text style={styles.heading}>10. CHANGES</Text>
                         <Text style={styles.paragraph}>
                             We may update this policy periodically. Continued use of our services constitutes acceptance.
                         </Text>
                     </View>
 
                     <View style={styles.block}>
-                        <Text style={styles.heading}>10. CONTACT US</Text>
+                        <Text style={styles.heading}>11. CONTACT US</Text>
                         <TouchableOpacity
                             style={styles.clickable}
                             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}

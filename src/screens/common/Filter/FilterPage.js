@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState } from "react";
 import {
     View,
     Text,
-    ScrollView,
     TextInput,
     Pressable,
     FlatList,
@@ -16,7 +15,8 @@ import { Dropdown } from "react-native-element-dropdown";
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { styles } from "./FilterPageStyles";
 import FilterComponent from "./components/FilterComponent/FilterComponent";
-import TruckCard from "./components/TruckCard/TruckCard";
+import TruckCard from "../../../components/TruckCard/TruckCard";
+import EmptyState from "../../../components/EmptyState/EmptyState";
 import { countries } from "../../../data/countries";
 import { truckSubCategories } from "../../../data/Content";
 import truckService from "../../../services/truckService";
@@ -97,6 +97,8 @@ const FilterPage = () => {
 
     const [listData, setListData] = useState([]);
     const [loading, setLoading] = useState(false);
+    // 'loading' | 'ready' | 'error'; the empty message only shows once loading is done
+    const [resultsStatus, setResultsStatus] = useState('loading');
 
     const [pagination, setPagination] = useState({
         totalPages: 0,
@@ -113,7 +115,7 @@ const FilterPage = () => {
         try {
             const combinedFilters = {
                 pageIndex,
-                limit: 5,
+                limit: 6,
                 searchText: debouncedSearchText,
                 listingType: filters.listingType,
                 truckCategory: filters.truckCategory,
@@ -132,19 +134,18 @@ const FilterPage = () => {
             });
 
             setCurrentPage(pageIndex);
+            setResultsStatus('ready');
 
         } catch (error) {
             console.log("FETCH TRUCK ERROR:", error?.message);
+            setResultsStatus('error');
         } finally {
             setLoading(false);
             dispatch(hideLoader());
         }
     };
 
-    useEffect(() => {
-        fetchTrucks(1);
-    }, []);
-
+    // Also runs on mount, so no separate mount-only fetch is needed
     useEffect(() => {
         fetchTrucks(1);
     }, [
@@ -166,6 +167,15 @@ const FilterPage = () => {
     const activeFilterCount = Object.entries(filters).filter(
         ([, v]) => (Array.isArray(v) ? v.length > 0 : !!v)
     ).length;
+
+    const hasSearchOrFilters = !!searchText.trim() || activeFilterCount > 0;
+
+    const clearSearchAndFilters = () => {
+        setSearchText("");
+        setFilters((prev) =>
+            Object.fromEntries(Object.entries(prev).map(([key, v]) => [key, Array.isArray(v) ? [] : ""]))
+        );
+    };
 
     const renderPagination = () => {
         if (totalPages <= 1) return null;
@@ -227,7 +237,9 @@ const FilterPage = () => {
     return (
         <View style={styles.container}>
 
-            <ScrollView showsVerticalScrollIndicator={false}>
+            {/* Plain View: Layout already provides the ScrollView, and a nested
+                vertical ScrollView competes with it for touches */}
+            <View>
 
                 {/* Top Search Section */}
                 <View style={styles.searchSection}>
@@ -330,28 +342,60 @@ const FilterPage = () => {
 
                 <View style={styles.cardsContainer}>
                     <FlatList
+                        keyboardShouldPersistTaps="handled"
                         data={listData}
                         keyExtractor={(item) => item._id}
                         scrollEnabled={false}
+                        numColumns={2}
+                        columnWrapperStyle={styles.cardsRow}
                         renderItem={({ item }) => (
                             <TruckCard
                                 images={item.images}
                                 title={item.vehicleName}
                                 price={item.vehiclePrice}
-                                location={item.country}
+                                country={item.country}
+                                state={item.state}
                                 miles={item.mileage}
+                                featured={item.Featured === true}
                                 data={item}
                             />
                         )}
-                        ItemSeparatorComponent={() => <View style={{ height: 14 }} />}
                     />
+
+                    {resultsStatus === 'ready' && listData.length === 0 && (
+                        hasSearchOrFilters ? (
+                            <EmptyState
+                                icon="search-outline"
+                                title="No equipment found"
+                                message="Nothing matches your search or filters. Try different keywords or clear the filters."
+                                actionLabel="Clear Search & Filters"
+                                onAction={clearSearchAndFilters}
+                            />
+                        ) : (
+                            <EmptyState
+                                icon="cube-outline"
+                                title="No equipment listed yet"
+                                message="New listings will appear here as soon as they're posted."
+                            />
+                        )
+                    )}
+
+                    {resultsStatus === 'error' && (
+                        <EmptyState
+                            icon="cloud-offline-outline"
+                            title="Couldn't load equipment"
+                            message="Please check your connection and try again."
+                            actionLabel="Try Again"
+                            onAction={() => fetchTrucks(currentPage)}
+                        />
+                    )}
                 </View>
 
                 {renderPagination()}
 
                 <View style={{ height: 40 }} />
 
-            </ScrollView>
+            </View>
 
             {/* Filter Modal */}
             <Modal

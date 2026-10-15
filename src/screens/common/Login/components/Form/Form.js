@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { setAuth } from "../../../../../redux/authSlice";
 import * as SecureStore from 'expo-secure-store';
 import { Toast } from 'toastify-react-native'
+import { showApiError } from '../../../../../utils/apiError'
 import * as yup from "yup";
 import useForm from "../../../../../hooks/useForm";
 import useApi from "../../../../../hooks/useApi";
@@ -43,7 +44,7 @@ const Form = () => {
                 Toast.error("Unable to login");
             }
         } catch (loginError) {
-            Toast.error(loginError);
+            showApiError(loginError, "Unable to login");
         }
     };
 

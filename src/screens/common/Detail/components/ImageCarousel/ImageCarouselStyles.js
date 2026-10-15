@@ -9,9 +9,14 @@ export const styles = StyleSheet.create({
         backgroundColor: '#000',
         position: 'relative',
     },
-    image: {
-        width: screenWidth,
+    slide: {
         height: 280,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#F3F4F6',
+    },
+    slideFill: {
+        ...StyleSheet.absoluteFill,
     },
 
     // ── Arrows ──

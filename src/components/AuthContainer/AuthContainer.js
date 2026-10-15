@@ -6,7 +6,7 @@ const logo = require("../../../assets/images/login_logo.png");
 
 const AuthContainer = ({ children }) => {
     return (
-        <ScrollView style={styles.container}>
+        <ScrollView keyboardShouldPersistTaps="handled" style={styles.container}>
             <ImageBackground
                 source={bg}
                 style={styles.background}

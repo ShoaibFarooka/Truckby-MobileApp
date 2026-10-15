@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-    Image,
     KeyboardAvoidingView,
     Platform,
     ScrollView,
@@ -9,15 +8,21 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { Image } from 'expo-image';
 import { Dropdown } from 'react-native-element-dropdown';
 import * as ImagePicker from 'expo-image-picker';
-import Toast from 'react-native-toast-message';
+import * as SecureStore from 'expo-secure-store';
+import { useNavigation } from '@react-navigation/native';
+import { Toast } from 'toastify-react-native';
+import { getErrorMessage, isSessionExpiredError, showApiError } from '../../../utils/apiError';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUserInfo } from '../../../redux/userSlice';
+import { clearAuth } from '../../../redux/authSlice';
+import { clearUser, fetchUserInfo } from '../../../redux/userSlice';
 import { hideLoader, showLoader } from '../../../redux/loaderSlice';
 import userService from '../../../services/userService';
-import { uploadImg } from '../../../services/image';
+import useImageUpload from '../../../hooks/useImageUpload';
 import subscriptionService from '../../../services/subscriptionService';
+import DeleteAccountModal from './components/DeleteAccountModal';
 import { styles } from './ProfileStyles';
 
 
@@ -36,6 +41,8 @@ function ToggleSwitch({ checked, onChange }) {
 
 export default function SellerProfile() {
     const dispatch = useDispatch();
+    const navigation = useNavigation();
+    const authUser = useSelector((state) => state.auth.user);
 
     const [formData, setFormData] = useState({
         name: '',
@@ -50,11 +57,15 @@ export default function SellerProfile() {
         image: '',
     });
 
-    const [imageFile, setImageFile] = useState(null);
-    const [previewUrl, setPreviewUrl] = useState(null);
+    const { prepare: prepareImage, clear: clearImage, upload: uploadImage } = useImageUpload();
+    // Start with the photo already in Redux (the Header has it cached) instead of waiting for the fetch
+    const [previewUrl, setPreviewUrl] = useState(authUser?.image || null);
     const [loading, setLoading] = useState(true);
     const [info, setInfo] = useState({ status: false, planName: '' });
     const [autoRenew, setAutoRenew] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [deleteError, setDeleteError] = useState('');
 
 
     useEffect(() => {
@@ -77,7 +88,7 @@ export default function SellerProfile() {
                 });
                 if (user?.image) setPreviewUrl(user.image);
             } catch (error) {
-                Toast.show({ type: 'error', text1: error?.response?.data?.error || 'Failed to load profile' });
+                showApiError(error, 'Failed to load profile');
             } finally {
                 dispatch(hideLoader());
                 setLoading(false);
@@ -92,7 +103,7 @@ export default function SellerProfile() {
                     setAutoRenew(response.info.autoRenew ?? false);
                 }
             } catch (error) {
-                Toast.show({ type: 'error', text1: error?.response?.data?.error || 'Failed to load subscription' });
+                showApiError(error, 'Failed to load subscription');
             }
         };
 
@@ -105,22 +116,18 @@ export default function SellerProfile() {
         setFormData((prev) => ({ ...prev, [name]: value }));
 
     const pickImage = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-            Toast.show({ type: 'error', text1: 'Permission to access photos is required' });
-            return;
-        }
+        // No permission request and no crop step: the system photo picker needs no
+        // permission, and allowsEditing forces the slow legacy picker on iOS. The
+        // avatar crops the photo to its frame with "cover".
         const result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [1, 1],
+            mediaTypes: ['images'],
             quality: 0.8,
         });
-        if (result.canceled) return;
+        if (result.canceled || !result.assets?.length) return;
         const asset = result.assets[0];
-        const ext = asset.uri.split('.').pop();
         setPreviewUrl(asset.uri);
-        setImageFile({ uri: asset.uri, type: `image/${ext === 'jpg' ? 'jpeg' : ext}`, name: `profile.${ext}` });
+        // Shrink it now on the device; it is only uploaded on save
+        prepareImage(asset);
     };
 
     const handleAutoRenewToggle = async () => {
@@ -128,9 +135,9 @@ export default function SellerProfile() {
             dispatch(showLoader());
             await subscriptionService.ToggleAutoRenew();
             setAutoRenew((prev) => !prev);
-            Toast.show({ type: 'success', text1: 'Auto Renew status updated' });
-        } catch {
-            Toast.show({ type: 'error', text1: 'Failed to update Auto Renew' });
+            Toast.success('Auto Renew status updated');
+        } catch (error) {
+            showApiError(error, 'Failed to update Auto Renew');
         } finally {
             dispatch(hideLoader());
         }
@@ -140,43 +147,69 @@ export default function SellerProfile() {
     const handleSubmit = async () => {
         let finalData = { ...formData };
 
-        if (imageFile) {
-            dispatch(showLoader());
-            try {
-                const form = new FormData();
-                form.append('images', imageFile);
-                const res = await uploadImg(form);
-                if (res?.success && res?.urls?.length > 0) {
-                    finalData.image = res.urls[0];
-                } else {
-                    Toast.show({ type: 'error', text1: 'Image upload failed' });
-                    return;
-                }
-            } catch {
-                Toast.show({ type: 'error', text1: 'Error uploading image' });
-                return;
-            } finally {
-                dispatch(hideLoader());
+        dispatch(showLoader());
+        try {
+            // Uploads the already-shrunk photo; null when no new photo was picked
+            const imageUrl = await uploadImage();
+            if (imageUrl) {
+                finalData.image = imageUrl;
+                // Start downloading the new photo now so the Header shows it as soon as the profile saves
+                Image.prefetch(imageUrl, 'memory-disk').catch(() => {});
             }
+        } catch (error) {
+            showApiError(error, 'Error uploading image');
+            dispatch(hideLoader());
+            return;
         }
 
         try {
-            dispatch(showLoader());
             const response = await userService.updateUserInfo(finalData);
             if (!response) {
-                Toast.show({ type: 'error', text1: 'Update failed' });
+                Toast.error('Update failed');
                 return;
             }
-            Toast.show({ type: 'success', text1: 'Profile updated successfully' });
+            Toast.success('Profile updated successfully');
+            // The photo is saved now; don't upload it again on the next save
+            clearImage();
+            setFormData(finalData);
             dispatch(fetchUserInfo());
         } catch (error) {
-            Toast.show({ type: 'error', text1: error?.response?.data?.error || 'Update failed' });
+            showApiError(error, 'Update failed');
         } finally {
             dispatch(hideLoader());
         }
     };
 
 
+    const openDeleteModal = () => {
+        setDeleteError('');
+        setDeleteOpen(true);
+    };
+
+    const handleDeleteAccount = async (password) => {
+        setDeleting(true);
+        setDeleteError('');
+        try {
+            await userService.deleteAccount({ password });
+            await SecureStore.deleteItemAsync('refreshToken');
+            setDeleteOpen(false);
+            // Leave the profile before clearing auth, otherwise its ProtectedRoute
+            // sees the logged-out state and sends the user to Login instead of Home
+            navigation.replace('Home');
+            dispatch(clearAuth());
+            dispatch(clearUser());
+            Toast.success('Your account has been deleted');
+        } catch (error) {
+            // The interceptor already logged the user out and announced it
+            if (isSessionExpiredError(error)) {
+                setDeleteOpen(false);
+                return;
+            }
+            setDeleteError(getErrorMessage(error, 'Unable to delete your account. Please try again.'));
+        } finally {
+            setDeleting(false);
+        }
+    };
 
     if (loading) return null;
 
@@ -194,7 +227,13 @@ export default function SellerProfile() {
                         <View style={styles.avatarRow}>
                             <TouchableOpacity style={styles.avatarWrapper} onPress={pickImage} activeOpacity={0.8}>
                                 {previewUrl ? (
-                                    <Image source={{ uri: previewUrl }} style={styles.avatarImage} />
+                                    <Image
+                                        source={{ uri: previewUrl }}
+                                        style={styles.avatarImage}
+                                        contentFit="cover"
+                                        cachePolicy="memory-disk"
+                                        transition={150}
+                                    />
                                 ) : (
                                     <View style={styles.avatarPlaceholder}>
                                         <Text style={styles.avatarPlaceholderText}>No Image</Text>
@@ -313,7 +352,26 @@ export default function SellerProfile() {
                         <Text style={styles.saveButtonText}>Save Changes</Text>
                     </TouchableOpacity>
                 </View>
+
+                {/* Delete Account */}
+                <View style={[styles.card, styles.dangerCard]}>
+                    <Text style={styles.dangerTitle}>Delete Account</Text>
+                    <Text style={styles.dangerText}>
+                        Permanently delete your account and all your listings. This can't be undone.
+                    </Text>
+                    <TouchableOpacity style={styles.deleteAccountButton} onPress={openDeleteModal} activeOpacity={0.85}>
+                        <Text style={styles.deleteAccountButtonText}>Delete my account</Text>
+                    </TouchableOpacity>
+                </View>
             </ScrollView>
+
+            <DeleteAccountModal
+                visible={deleteOpen}
+                deleting={deleting}
+                error={deleteError}
+                onClose={() => setDeleteOpen(false)}
+                onConfirm={handleDeleteAccount}
+            />
         </KeyboardAvoidingView>
     );
 }

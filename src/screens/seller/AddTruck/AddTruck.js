@@ -13,6 +13,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import * as ImagePicker from "expo-image-picker";
 import { Toast } from "toastify-react-native";
+import { showApiError } from "../../../utils/apiError";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -25,26 +26,6 @@ import { truckCategory, truckSubCategories } from "../../../data/Content";
 import { styles } from "./AddTruckStyles";
 import CustomPicker from "./components/CustomPicker";
 import { countries } from "../../../data/countries";
-
-const showToast = (type, message) => {
-    switch (type) {
-        case "success":
-            Toast.success(message);
-            break;
-        case "error":
-            Toast.error(message);
-            break;
-        case "info":
-            Toast.info(message);
-            break;
-        case "warn":
-        case "warning":
-            Toast.warn(message);
-            break;
-        default:
-            Toast.show?.(message);
-    }
-};
 
 const AddTruck = () => {
     const route = useRoute();
@@ -155,9 +136,8 @@ const AddTruck = () => {
                             img.isLocal ? uploaded[uploadedIdx++] : img.uri
                         );
                     } else {
-                        showToast("error", "Failed to upload images");
-                        setSubmitting(false);
-                        dispatch(hideLoader());
+                        Toast.error("Failed to upload images");
+                        // finally hides the loader and resets submitting
                         return;
                     }
                 } else {
@@ -171,17 +151,16 @@ const AddTruck = () => {
 
                 if (oldTruckData?._id) {
                     await truckService.updateTruck(oldTruckData._id, truckData);
-                    showToast("success", "Equipment updated successfully!");
+                    Toast.success("Equipment updated successfully!");
                 } else {
                     await truckService.createTruck(truckData);
-                    showToast("success", "Equipment listed successfully!");
+                    Toast.success("Equipment listed successfully!");
                     resetForm();
                     setPreviewImages([]);
                 }
                 navigation.navigate("Listing");
             } catch (error) {
-                showToast("error", error?.response?.data?.error || "Listing failed");
-                console.error("Listing error:", error);
+                showApiError(error, "Listing failed");
             } finally {
                 dispatch(hideLoader());
                 setSubmitting(false);
@@ -194,15 +173,10 @@ const AddTruck = () => {
     const maxImages = 20;
 
     const pickImages = async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== "granted") {
-            showToast("error", "Permission to access photos is required");
-            return;
-        }
-
+        // The system photo picker needs no permission; requesting full library
+        // access first only delayed opening it
         const result = await ImagePicker.launchImageLibraryAsync({
-            // eslint-disable-next-line deprecation/deprecation
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
+            mediaTypes: ['images'],
             allowsMultipleSelection: true,
             quality: 0.8,
             selectionLimit: maxImages - previewImages.length,
@@ -219,11 +193,11 @@ const AddTruck = () => {
             const normalizedType = type.startsWith("image/") ? type : `image/${type}`;
 
             if (!validImageTypes.includes(normalizedType)) {
-                showToast("error", `Unsupported format: ${normalizedType}`);
+                Toast.error(`Unsupported format: ${normalizedType}`);
                 continue;
             }
             if (asset.fileSize && asset.fileSize > maxSize) {
-                showToast("error", `"${asset.fileName || "Image"}" exceeds 6MB`);
+                Toast.error(`"${asset.fileName || "Image"}" exceeds 6MB`);
                 continue;
             }
             accepted.push({ uri: asset.uri, isLocal: true });
@@ -245,7 +219,7 @@ const AddTruck = () => {
     const handleSubmit = async () => {
         const errors = await formik.validateForm();
         if (Object.keys(errors).length > 0) {
-            showToast("error", "Please fill out all required fields");
+            Toast.error("Please fill out all required fields");
             return;
         }
         formik.handleSubmit();
