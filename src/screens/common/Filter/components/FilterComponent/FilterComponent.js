@@ -184,7 +184,7 @@ const FilterComponent = ({ filters, setFilters, onFilterChange, onClose }) => {
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Filters</Text>
                 <Pressable onPress={onClose} hitSlop={10}>
-                    <Ionicons name="close" size={24} color="#C8102E" />
+                    <Ionicons name="close" size={24} color="#DF0805" />
                 </Pressable>
             </View>
 
