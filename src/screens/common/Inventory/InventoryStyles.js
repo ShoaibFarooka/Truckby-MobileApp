@@ -50,7 +50,7 @@ export default StyleSheet.create({
 
     shareButton: {
         marginTop: 16,
-        backgroundColor: "#d32f2f",
+        backgroundColor: "#DF0805",
         borderRadius: 8,
         paddingVertical: 12,
         justifyContent: "center",

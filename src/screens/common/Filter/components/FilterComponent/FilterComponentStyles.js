@@ -54,7 +54,7 @@ export const styles = StyleSheet.create({
 
     clearAllText: {
         fontSize: 14,
-        color: "#C8102E",
+        color: "#DF0805",
         fontWeight: "600",
     },
 
@@ -214,8 +214,8 @@ export const styles = StyleSheet.create({
     },
 
     checkboxActive: {
-        backgroundColor: "#C8102E",
-        borderColor: "#C8102E",
+        backgroundColor: "#DF0805",
+        borderColor: "#DF0805",
     },
 
     checkboxLabel: {

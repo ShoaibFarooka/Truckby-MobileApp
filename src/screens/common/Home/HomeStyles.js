@@ -212,8 +212,8 @@ export const styles = StyleSheet.create({
     },
 
     paginationButtonActive: {
-        backgroundColor: "#C8102E",
-        borderColor: "#C8102E",
+        backgroundColor: "#DF0805",
+        borderColor: "#DF0805",
     },
 
     paginationButtonText: {

@@ -109,7 +109,7 @@ export const styles = StyleSheet.create({
     filterButton: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#C8102E",
+        backgroundColor: "#DF0805",
         borderRadius: 8,
         paddingHorizontal: 14,
         paddingVertical: 9,
@@ -133,7 +133,7 @@ export const styles = StyleSheet.create({
     },
 
     filterBadgeText: {
-        color: "#C8102E",
+        color: "#DF0805",
         fontSize: 11,
         fontWeight: "700",
     },
@@ -186,8 +186,8 @@ export const styles = StyleSheet.create({
     },
 
     paginationButtonActive: {
-        backgroundColor: "#C8102E",
-        borderColor: "#C8102E",
+        backgroundColor: "#DF0805",
+        borderColor: "#DF0805",
     },
 
     paginationButtonText: {

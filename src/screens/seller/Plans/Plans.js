@@ -7,6 +7,7 @@ import subscriptionService from "../../../services/subscriptionService";
 import productService from "../../../services/productService";
 import { showLoader, hideLoader } from "../../../redux/loaderSlice";
 import { fetchUserInfo } from "../../../redux/userSlice";
+import WebPlanLink from "../../../components/WebPlanLink/WebPlanLink";
 import { styles } from "./PlansStyles";
 
 const allFeatures = [
@@ -18,8 +19,9 @@ const allFeatures = [
     "Email Blast",
 ];
 
-// Read-only view of the seller's current plan. Plans are purchased outside
-// the mobile app, so this screen must not show prices or purchase options.
+// Read-only view of the seller's current plan. Plans are purchased on the
+// website, so this screen must not show prices or purchase options. The only
+// way to buy is WebPlanLink, which is shown on the US App Store only.
 const Plans = () => {
     const [products, setProducts] = useState([]);
     const [info, setInfo] = useState({
@@ -126,6 +128,12 @@ const Plans = () => {
                         </View>
                     ) : (
                         renderEmptyState()
+                    )}
+
+                    {loaded && (
+                        <WebPlanLink
+                            label={currentPlan ? "Change plan on truckby.com" : "Get a plan on truckby.com"}
+                        />
                     )}
                 </View>
             </ScrollView>

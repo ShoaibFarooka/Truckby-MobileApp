@@ -32,6 +32,8 @@ const AddTruck = () => {
     const navigation = useNavigation();
     const oldTruckData = route.params?.truckData;
     const [previewImages, setPreviewImages] = useState([]);
+    // The page stops scrolling while a photo is being dragged
+    const [isDraggingImage, setIsDraggingImage] = useState(false);
     const user = useSelector((state) => state?.user);
     const dispatch = useDispatch();
 
@@ -235,6 +237,7 @@ const AddTruck = () => {
             <ScrollView
                 contentContainerStyle={styles.container}
                 keyboardShouldPersistTaps="handled"
+                scrollEnabled={!isDraggingImage}
             >
                 <View style={styles.card}>
                     <Text style={styles.title}>
@@ -358,6 +361,7 @@ const AddTruck = () => {
                             <DraggableImageList
                                 images={previewImages}
                                 onRemove={handleRemoveImage}
+                                onDragActiveChange={setIsDraggingImage}
                                 onReorderComplete={(reordered) => {
                                     setPreviewImages(reordered);
                                     formik.setFieldValue("images", reordered.map((img) => img.uri));

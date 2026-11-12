@@ -156,6 +156,9 @@ const Form = () => {
                     <TextInput
                         placeholder="Email"
                         keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        autoComplete="email"
                         style={styles.input}
                         placeholderTextColor="#9ca3af"
                         value={form.values.email}
@@ -277,7 +280,7 @@ const Form = () => {
                 <View>
                     <Foundation name="marker" size={20} color="#9ca3af" style={[styles.icon, styles.leftIcon]} />
                     <TextInput
-                        placeholder="Location"
+                        placeholder="City"
                         style={styles.input}
                         placeholderTextColor="#9ca3af"
                         value={form.values.city}

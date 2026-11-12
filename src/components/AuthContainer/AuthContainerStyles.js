@@ -11,6 +11,15 @@ export const styles = StyleSheet.create({
         width: "100%",
         height: "60%"
     },
+    // Same size the image had inside the old ImageBackground: 60% of the
+    // background box, cropped to cover
+    backgroundImage: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "60%"
+    },
     box: {
         alignSelf: "center",
         zIndex: 10,

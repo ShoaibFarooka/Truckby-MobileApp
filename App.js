@@ -7,6 +7,7 @@ import ToastManager from 'toastify-react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import Navigator from "./src/navigator/Navigator.js";
 import Loader from "./src/components/Loader/Loader.js";
+import { swipeableToastConfig } from "./src/components/SwipeableToast/SwipeableToast.js";
 
 export default function App() {
   return (
@@ -24,6 +25,7 @@ export default function App() {
           {/* useModal={false}: the default Modal mode blocks every tap and scroll
               on the screen until the toast disappears */}
           <ToastManager
+            config={swipeableToastConfig}
             useModal={false}
             showCloseIcon={false}
             showProgressBar={false}

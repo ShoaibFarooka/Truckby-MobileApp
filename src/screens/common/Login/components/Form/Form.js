@@ -56,6 +56,9 @@ const Form = () => {
                     <TextInput
                         placeholder="Email"
                         keyboardType="email-address"
+                        autoCapitalize="none"
+                        autoCorrect={false}
+                        autoComplete="email"
                         style={styles.input}
                         placeholderTextColor="#9ca3af"
                         value={form.values.email}

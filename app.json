@@ -2,7 +2,7 @@
   "expo": {
     "name": "Truckby",
     "slug": "truckby",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -48,6 +48,12 @@
       ],
       "expo-font"
     ],
-    "scheme": "truckby"
+    "scheme": "truckby",
+    "owner": "truckbys-team",
+    "extra": {
+      "eas": {
+        "projectId": "fea42e54-4140-47e2-bbf8-969a387c9126"
+      }
+    }
   }
 }
